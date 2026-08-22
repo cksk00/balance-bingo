@@ -10,81 +10,26 @@ type Choice = "A" | "B" | null;
 const ROWS = 5;
 const COLS = 5;
 
-type ValidChoice = "A" | "B" | "HIT";
-
-export default function Round1Page() {
+export default function Round2GuessPage() {
   const router = useRouter();
   const [playerId, setPlayerId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<number | null>(null);
   const [cells, setCells] = useState<Cell[]>([]);
   const [selections, setSelections] = useState<Choice[]>(Array(25).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-  const [validChoices, setValidChoices] = useState<Record<number, ValidChoice>>({});
-  const [bingoCount, setBingoCount] = useState(0);
 
-  // 결과 공개 상태 구독
   useEffect(() => {
-    supabase
-      .from("game_state")
-      .select("round1_revealed")
-      .eq("id", 1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.round1_revealed) setRevealed(true);
-      });
-
-    const channel = supabase
-      .channel("round1-game-state")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "game_state" },
-        (payload) => {
-          const row = payload.new as { round1_revealed?: boolean };
-          if (row?.round1_revealed) setRevealed(true);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  // 결과 공개되면 확정 결과 + 내 빙고 달성 여부 불러오기
-  useEffect(() => {
-    if (!revealed || !playerId) return;
-    supabase
-      .from("round1_results")
-      .select("cell_index, valid_choice")
-      .then(({ data }) => {
-        if (!data) return;
-        const map: Record<number, ValidChoice> = {};
-        for (const row of data as { cell_index: number; valid_choice: ValidChoice }[]) {
-          map[row.cell_index] = row.valid_choice;
-        }
-        setValidChoices(map);
-      });
-    supabase
-      .from("round1_bingo_winners")
-      .select("bingo_count")
-      .eq("player_id", playerId)
-      .maybeSingle()
-      .then(({ data }) => {
-        setBingoCount(data?.bingo_count || 0);
-      });
-  }, [revealed, playerId]);
-
-  // 로그인 확인
-  useEffect(() => {
-    const id = localStorage.getItem("bb_player_id");
-    if (!id) {
+    const pid = localStorage.getItem("bb_player_id");
+    const tid = localStorage.getItem("bb_team_id");
+    if (!pid || !tid) {
       router.push("/");
       return;
     }
-    setPlayerId(id);
+    setPlayerId(pid);
+    setTeamId(Number(tid));
   }, [router]);
 
-  // 빙고 칸 구성 로드
   useEffect(() => {
     supabase
       .from("round1_cells")
@@ -95,19 +40,18 @@ export default function Round1Page() {
       });
   }, []);
 
-  // 내 기존 응답 불러오기
   useEffect(() => {
     if (!playerId) return;
     supabase
-      .from("round1_answers")
-      .select("cell_index, choice")
+      .from("round2_guesses")
+      .select("answers")
       .eq("player_id", playerId)
+      .maybeSingle()
       .then(({ data }) => {
         if (!data) return;
+        const answers = data.answers as Record<string, "A" | "B">;
         const next = Array(25).fill(null) as Choice[];
-        for (const row of data as { cell_index: number; choice: "A" | "B" }[]) {
-          next[row.cell_index] = row.choice;
-        }
+        for (let i = 0; i < 25; i++) next[i] = answers[String(i)] ?? null;
         setSelections(next);
         if (next.every((v) => v !== null)) setSubmitted(true);
       });
@@ -125,62 +69,48 @@ export default function Round1Page() {
   const completedCount = selections.filter(Boolean).length;
 
   const handleSubmit = useCallback(async () => {
-    if (!playerId) return;
+    if (!teamId || !playerId) return;
     if (completedCount < 25) return;
     setSubmitting(true);
-    const rows = selections.map((choice, cell_index) => ({
-      player_id: playerId,
-      cell_index,
-      choice,
-    }));
-    const { error } = await supabase
-      .from("round1_answers")
-      .upsert(rows, { onConflict: "player_id,cell_index" });
+    const answers: Record<string, "A" | "B"> = {};
+    selections.forEach((choice, i) => {
+      if (choice) answers[String(i)] = choice;
+    });
+    const { error } = await supabase.from("round2_guesses").upsert(
+      { player_id: playerId, team_id: teamId, answers },
+      { onConflict: "player_id" }
+    );
     setSubmitting(false);
     if (!error) setSubmitted(true);
-  }, [playerId, completedCount, selections]);
+  }, [teamId, playerId, completedCount, selections]);
 
   const grid = useMemo(() => {
     const g: Cell[][] = [];
-    for (let r = 0; r < ROWS; r++) {
-      g.push(cells.slice(r * COLS, r * COLS + COLS));
-    }
+    for (let r = 0; r < ROWS; r++) g.push(cells.slice(r * COLS, r * COLS + COLS));
     return g;
   }, [cells]);
 
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
-        <p className="text-sm text-navy/60">ROUND 1 · 개인 밸런스 빙고</p>
+        <p className="text-sm text-navy/60">ROUND 2 · 대표자 답 예측</p>
         <h1 className="text-3xl font-extrabold text-navy">
-          각 칸의 선택지 중 하나를 골라 체크하세요
+          우리 팀 대표자가 골랐을 법한 답을 예측하세요
         </h1>
         <p className="text-sm text-navy/60 mt-2">
-          완료 {completedCount} / 25 · 다른 사람들이 무엇을 골랐는지는 결과
-          공개 전까지 보이지 않아요.
+          완료 {completedCount} / 25 · 결과는 라운드가 끝난 뒤 공개돼요.
         </p>
       </div>
-
-      {revealed && (
-        <div className="mb-6 bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
-          {bingoCount > 0
-            ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
-            : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
-        </div>
-      )}
 
       <div className="bg-navy rounded-3xl p-6 shadow-xl">
         <div className="grid grid-cols-5 gap-2">
           {grid.map((row) =>
             row.map((cell) => {
               const choice = selections[cell.cell_index];
-              const valid = validChoices[cell.cell_index];
               return (
                 <div
                   key={cell.cell_index}
-                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 ${
-                    revealed && valid ? "ring-2 ring-hit" : ""
-                  }`}
+                  className="bg-white/5 rounded-xl p-1.5 flex flex-col gap-1"
                 >
                   <button
                     onClick={() => toggle(cell.cell_index, "A")}
@@ -188,10 +118,6 @@ export default function Round1Page() {
                       choice === "A"
                         ? "bg-accentA text-white"
                         : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    } ${
-                      revealed && (valid === "A" || valid === "HIT")
-                        ? "outline outline-2 outline-hit"
-                        : ""
                     }`}
                   >
                     {cell.option_a}
@@ -202,10 +128,6 @@ export default function Round1Page() {
                       choice === "B"
                         ? "bg-accentB text-white"
                         : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    } ${
-                      revealed && (valid === "B" || valid === "HIT")
-                        ? "outline outline-2 outline-hit"
-                        : ""
                     }`}
                   >
                     {cell.option_b}

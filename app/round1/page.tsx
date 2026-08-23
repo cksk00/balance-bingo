@@ -168,7 +168,7 @@ export default function Round1Page() {
 
       {revealed && (
         <div className="mb-6 space-y-3">
-          <div className="bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
+          <div className="bg-white border border-navy/10 text-navy rounded-xl p-4 text-sm font-semibold shadow-sm">
             {bingoCount > 0
               ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
               : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
@@ -193,7 +193,7 @@ export default function Round1Page() {
                 <div
                   key={cell.cell_index}
                   className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
-                    isDimmed ? "opacity-20" : ""
+                    isDimmed ? "opacity-[0.12] brightness-50 grayscale" : ""
                   }`}
                 >
                   <button

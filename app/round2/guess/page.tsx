@@ -34,7 +34,7 @@ export default function Round2GuessPage() {
 
   useEffect(() => {
     supabase
-      .from("round1_cells")
+      .from("round2_cells")
       .select("cell_index, option_a, option_b")
       .order("cell_index")
       .then(({ data }) => {

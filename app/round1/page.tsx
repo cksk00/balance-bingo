@@ -240,15 +240,15 @@ export default function Round1Page() {
                 const isHorizontal = Math.floor(last / COLS) === row;
                 const isVertical = last % COLS === col;
                 if (isHorizontal) {
-                  return <rect key={`${first}-${last}-${index}`} x="0.7" y={row * 20 + 0.7} width="98.6" height="18.6" rx="2.5" fill="none" stroke="#FF2D55" strokeWidth="4" vectorEffect="non-scaling-stroke" />;
+                  return <rect key={`${first}-${last}-${index}`} x="0.7" y={row * 20 + 0.7} width="98.6" height="18.6" rx="2.5" fill="none" stroke="#FFC53D" strokeWidth="2" vectorEffect="non-scaling-stroke" />;
                 }
                 if (isVertical) {
-                  return <rect key={`${first}-${last}-${index}`} x={col * 20 + 0.7} y="0.7" width="18.6" height="98.6" rx="2.5" fill="none" stroke="#FF2D55" strokeWidth="4" vectorEffect="non-scaling-stroke" />;
+                  return <rect key={`${first}-${last}-${index}`} x={col * 20 + 0.7} y="0.7" width="18.6" height="98.6" rx="2.5" fill="none" stroke="#FFC53D" strokeWidth="2" vectorEffect="non-scaling-stroke" />;
                 }
                 const points = first === 0
                   ? "-3,10 10,-3 103,90 90,103"
                   : "90,-3 103,10 10,103 -3,90";
-                return <polygon key={`${first}-${last}-${index}`} points={points} fill="none" stroke="#FF2D55" strokeWidth="4" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />;
+                return <polygon key={`${first}-${last}-${index}`} points={points} fill="none" stroke="#FFC53D" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />;
               })}
             </svg>
           )}

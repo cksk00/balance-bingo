@@ -27,7 +27,7 @@ export default function Round2ResultsPage() {
       await Promise.all([
         supabase.from("game_state").select("round2_ranking_revealed").eq("id", 1).maybeSingle(),
         supabase.from("teams").select("id, name").order("id"),
-        supabase.from("round1_cells").select("cell_index, option_a, option_b").order("cell_index"),
+        supabase.from("round2_cells").select("cell_index, option_a, option_b").order("cell_index"),
         supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
         supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       ]);

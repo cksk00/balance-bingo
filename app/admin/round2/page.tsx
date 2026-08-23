@@ -81,13 +81,13 @@ export default function AdminRound2Page() {
         <h1 className="text-3xl font-extrabold text-navy">ROUND 2 관리</h1>
         <button onClick={resetRound2} disabled={busy} className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-xl disabled:opacity-40">ROUND 2 초기화</button>
       </div>
-      <p className="text-sm text-navy/60 mb-6">종합점수 = 정확도 60점 + 평균 제출시간 상대점수 40점</p>
+      <p className="text-sm text-navy/60 mb-6">종합점수 = 맞춘 칸당 1점 + 완성 빙고당 10점 + 평균 제출시간 상대점수 최대 40점</p>
       {error && <p className="text-accentB text-sm mb-4">{error}</p>}
 
       <section className="bg-navy text-white rounded-3xl p-6 shadow-xl mb-8">
         <div className="flex items-center justify-between gap-3 mb-4"><h2 className="text-xl font-extrabold">실시간 팀 순위</h2><button onClick={revealRankings} disabled={busy || rankingRevealed || rankings.length === 0} className="bg-hit text-ink font-bold px-4 py-2 rounded-xl disabled:opacity-40">{rankingRevealed ? "순위 공개 완료" : "순위 공개하기"}</button></div>
         <div className="space-y-2">
-          {rankings.map((row) => <div key={row.teamId} className="bg-white/10 rounded-xl px-4 py-3 grid grid-cols-[55px_1fr_auto] gap-3 items-center"><p className="text-xl font-extrabold">{row.rank}위</p><div><p className="font-bold">{teamName(row.teamId)}</p><p className="text-xs text-blue-200">정확도 {row.accuracyScore.toFixed(1)}/60 · 시간 {row.timeScore.toFixed(1)}/40 · 평균 {formatDuration(row.averageSeconds)}</p></div><p className="text-right font-bold">{row.matchCount}/25<br /><span className="text-xs text-blue-200">{row.matchPercent}% · {row.totalScore.toFixed(1)}점</span></p></div>)}
+          {rankings.map((row) => <div key={row.teamId} className="bg-white/10 rounded-xl px-4 py-3 grid grid-cols-[55px_1fr_auto] gap-3 items-center"><p className="text-xl font-extrabold">{row.rank}위</p><div><p className="font-bold">{teamName(row.teamId)}</p><p className="text-xs text-blue-200">정답 {row.answerScore}점 · 빙고 {row.bingoCount}줄 (+{row.bingoBonus}) · 시간 {row.timeScore.toFixed(1)}/40 · 평균 {formatDuration(row.averageSeconds)}</p></div><p className="text-right font-bold">{row.matchCount}/25<br /><span className="text-xs text-blue-200">{row.matchPercent}% · {row.totalScore.toFixed(1)}점</span></p></div>)}
           {rankings.length === 0 && <p className="text-sm text-blue-200">CAPTAIN과 일반 제출이 모두 있는 팀부터 순위에 표시됩니다.</p>}
         </div>
       </section>

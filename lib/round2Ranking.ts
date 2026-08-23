@@ -1,3 +1,5 @@
+import { bingoLines } from "@/lib/bingoLines";
+
 export type Choice = "A" | "B";
 export type Answers = Record<string, Choice>;
 
@@ -23,8 +25,10 @@ export type Round2RankingRow = {
   guesses: GuessSubmission[];
   matchCount: number;
   matchPercent: number;
+  bingoCount: number;
+  bingoBonus: number;
   averageSeconds: number;
-  accuracyScore: number;
+  answerScore: number;
   timeScore: number;
   totalScore: number;
   rank: number;
@@ -55,6 +59,16 @@ export function calculateRound2Rankings(
       }
 
       const captainTime = new Date(captain.created_at).getTime();
+      const matchedFlags = Array.from(
+        { length: 25 },
+        (_, index) =>
+          teamAnswers[String(index)] !== null &&
+          teamAnswers[String(index)] === captain.answers[String(index)]
+      );
+      const bingoCount = bingoLines().filter((line) =>
+        line.every((index) => matchedFlags[index])
+      ).length;
+      const bingoBonus = bingoCount * 10;
       const averageSeconds =
         teamGuesses.reduce((sum, guess) => {
           const elapsed = Math.max(0, new Date(guess.created_at).getTime() - captainTime);
@@ -68,8 +82,10 @@ export function calculateRound2Rankings(
         guesses: teamGuesses,
         matchCount,
         matchPercent: Math.round((matchCount / 25) * 100),
+        bingoCount,
+        bingoBonus,
         averageSeconds,
-        accuracyScore: (matchCount / 25) * 60,
+        answerScore: matchCount,
         timeScore: 0,
         totalScore: 0,
         rank: 0,
@@ -85,12 +101,13 @@ export function calculateRound2Rankings(
     const normalizedTime =
       fastest === slowest ? 1 : (slowest - row.averageSeconds) / (slowest - fastest);
     row.timeScore = normalizedTime * 40;
-    row.totalScore = row.accuracyScore + row.timeScore;
+    row.totalScore = row.answerScore + row.bingoBonus + row.timeScore;
   }
 
   rows.sort(
     (a, b) =>
       b.totalScore - a.totalScore ||
+      b.bingoCount - a.bingoCount ||
       b.matchCount - a.matchCount ||
       a.averageSeconds - b.averageSeconds ||
       a.teamId - b.teamId

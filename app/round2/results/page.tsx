@@ -66,7 +66,7 @@ export default function Round2ResultsPage() {
             <p className="text-5xl mb-2">🏆</p>
             <p className="text-4xl font-extrabold text-navy">1위 · {teamName(winner.teamId)}</p>
             <p className="text-navy/60 mt-2">
-              정답률 {winner.matchPercent}% · {winner.matchCount}/25개 · 평균 {formatDuration(winner.averageSeconds)} · 종합 {winner.totalScore.toFixed(1)}점
+              정답률 {winner.matchPercent}% · {winner.matchCount}/25개 · 빙고 {winner.bingoCount}줄 (+{winner.bingoBonus}점) · 평균 {formatDuration(winner.averageSeconds)} · 종합 {winner.totalScore.toFixed(1)}점
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -84,7 +84,7 @@ export default function Round2ResultsPage() {
         <section className="space-y-3">
           {rankings.map((row) => (
             <div key={row.teamId} className="bg-white rounded-2xl p-5 shadow flex items-center justify-between">
-              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">평균 제출 {formatDuration(row.averageSeconds)} · 종합 {row.totalScore.toFixed(1)}점</p></div>
+              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">빙고 {row.bingoCount}줄 (+{row.bingoBonus}점) · 평균 제출 {formatDuration(row.averageSeconds)} · 종합 {row.totalScore.toFixed(1)}점</p></div>
               <p className="text-right font-bold text-navy">정답률 {row.matchPercent}%<br /><span className="text-sm">{row.matchCount}/25개</span></p>
             </div>
           ))}

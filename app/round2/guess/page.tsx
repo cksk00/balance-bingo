@@ -18,6 +18,8 @@ export default function Round2GuessPage() {
   const [selections, setSelections] = useState<Choice[]>(Array(25).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [captainReady, setCaptainReady] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -57,6 +59,23 @@ export default function Round2GuessPage() {
       });
   }, [playerId]);
 
+  useEffect(() => {
+    if (!teamId || !playerId) return;
+    supabase
+      .from("round2_answer_key")
+      .select("submitted_by")
+      .eq("team_id", teamId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.submitted_by === playerId) {
+          router.push("/round2/answer");
+          return;
+        }
+        setCaptainReady(true);
+      });
+  }, [teamId, playerId, router]);
+
   function toggle(cellIndex: number, choice: "A" | "B") {
     if (submitted) return;
     setSelections((prev) => {
@@ -69,20 +88,24 @@ export default function Round2GuessPage() {
   const completedCount = selections.filter(Boolean).length;
 
   const handleSubmit = useCallback(async () => {
-    if (!teamId || !playerId) return;
+    if (!teamId || !playerId || !captainReady) return;
     if (completedCount < 25) return;
     setSubmitting(true);
     const answers: Record<string, "A" | "B"> = {};
     selections.forEach((choice, i) => {
       if (choice) answers[String(i)] = choice;
     });
-    const { error } = await supabase.from("round2_guesses").upsert(
-      { player_id: playerId, team_id: teamId, answers },
-      { onConflict: "player_id" }
-    );
+    setError("");
+    const { error } = await supabase
+      .from("round2_guesses")
+      .insert({ player_id: playerId, team_id: teamId, answers });
     setSubmitting(false);
-    if (!error) setSubmitted(true);
-  }, [teamId, playerId, completedCount, selections]);
+    if (error) {
+      setError("이미 제출한 빙고는 수정할 수 없어요.");
+      return;
+    }
+    setSubmitted(true);
+  }, [teamId, playerId, captainReady, completedCount, selections]);
 
   const grid = useMemo(() => {
     const g: Cell[][] = [];
@@ -103,6 +126,10 @@ export default function Round2GuessPage() {
       </div>
 
       <div className="bg-navy rounded-3xl p-6 shadow-xl">
+        {!captainReady && (
+          <p className="text-hit text-sm mb-4">CAPTAIN 빙고가 제출되기를 기다리고 있어요.</p>
+        )}
+        {error && <p className="text-accentB text-sm mb-4">{error}</p>}
         <div className="grid grid-cols-5 gap-2">
           {grid.map((row) =>
             row.map((cell) => {
@@ -140,7 +167,7 @@ export default function Round2GuessPage() {
 
         <button
           onClick={handleSubmit}
-          disabled={completedCount < 25 || submitting || submitted}
+          disabled={!captainReady || completedCount < 25 || submitting || submitted}
           className="w-full mt-6 bg-accentA hover:bg-blue-500 transition text-white font-bold py-3 rounded-xl disabled:opacity-40"
         >
           {submitted ? "제출 완료 · 결과 공개를 기다려주세요" : submitting ? "제출 중..." : "제출하기"}

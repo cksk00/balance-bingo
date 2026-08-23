@@ -18,6 +18,7 @@ export default function AdminRound1Page() {
   const [completedPlayers, setCompletedPlayers] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [revealing, setRevealing] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -93,14 +94,32 @@ export default function AdminRound1Page() {
     setRevealing(false);
   }
 
+  async function handleReset() {
+    if (!confirm("ROUND 1의 모든 참가자 답안, 확정 결과, 빙고 기록과 점수를 초기화할까요? 이 작업은 되돌릴 수 없습니다.")) return;
+    setResetting(true);
+    setError("");
+    const results = await Promise.all([
+      supabase.from("round1_bingo_winners").delete().not("player_id", "is", null),
+      supabase.from("round1_results").delete().not("cell_index", "is", null),
+      supabase.from("round1_answers").delete().not("player_id", "is", null),
+      supabase.from("team_scores").update({ round1: 0 }).not("team_id", "is", null),
+      supabase.from("game_state").update({ round1_revealed: false }).eq("id", 1),
+    ]);
+    const failed = results.find((result) => result.error)?.error;
+    if (failed) setError(failed.message);
+    setRevealed(false);
+    await refresh();
+    setResetting(false);
+  }
+
   return (
     <main className="min-h-screen px-4 py-8 max-w-3xl mx-auto">
       <Link href="/admin" className="text-sm text-navy/60 underline">
         ← 대시보드
       </Link>
-      <div className="flex items-center justify-between mt-2 mb-6">
+      <div className="flex items-center justify-between gap-3 mt-2 mb-6">
         <h1 className="text-3xl font-extrabold text-navy">ROUND 1 관리</h1>
-        <p className="text-sm text-navy/60">완주 {completedPlayers}명</p>
+        <div className="flex items-center gap-3"><p className="text-sm text-navy/60">완주 {completedPlayers}명</p><button onClick={handleReset} disabled={resetting} className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-xl disabled:opacity-40">{resetting ? "초기화 중..." : "ROUND 1 초기화"}</button></div>
       </div>
 
       {!revealed ? (

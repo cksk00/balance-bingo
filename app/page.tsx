@@ -74,7 +74,7 @@ export default function HomePage() {
         />
 
         <label className="block text-sm text-blue-200 mb-2">팀 선택</label>
-        <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="grid grid-cols-4 gap-2 mb-6">
           {teams.map((t) => (
             <button
               key={t.id}

@@ -18,6 +18,7 @@ export default function Round2AnswerPage() {
   const [selections, setSelections] = useState<Choice[]>(Array(25).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -44,18 +45,22 @@ export default function Round2AnswerPage() {
     if (!teamId) return;
     supabase
       .from("round2_answer_key")
-      .select("answers")
+      .select("answers, submitted_by")
       .eq("team_id", teamId)
       .maybeSingle()
       .then(({ data }) => {
         if (!data) return;
+        if (data.submitted_by !== playerId) {
+          router.push("/round2");
+          return;
+        }
         const answers = data.answers as Record<string, "A" | "B">;
         const next = Array(25).fill(null) as Choice[];
         for (let i = 0; i < 25; i++) next[i] = answers[String(i)] ?? null;
         setSelections(next);
         if (next.every((v) => v !== null)) setSubmitted(true);
       });
-  }, [teamId]);
+  }, [teamId, playerId, router]);
 
   function toggle(cellIndex: number, choice: "A" | "B") {
     if (submitted) return;
@@ -76,12 +81,19 @@ export default function Round2AnswerPage() {
     selections.forEach((choice, i) => {
       if (choice) answers[String(i)] = choice;
     });
-    const { error } = await supabase.from("round2_answer_key").upsert(
-      { team_id: teamId, answers, submitted_by: playerId },
-      { onConflict: "team_id" }
-    );
+    setError("");
+    const { error } = await supabase
+      .from("round2_answer_key")
+      .insert({ team_id: teamId, answers, submitted_by: playerId });
     setSubmitting(false);
-    if (!error) setSubmitted(true);
+    if (error) {
+      setError("이미 이 팀의 CAPTAIN 빙고가 제출됐어요. 제출 후에는 수정할 수 없습니다.");
+      return;
+    }
+    await supabase
+      .from("round2_reps")
+      .insert({ team_id: teamId, player_id: playerId });
+    setSubmitted(true);
   }, [teamId, playerId, completedCount, selections]);
 
   const grid = useMemo(() => {
@@ -93,17 +105,18 @@ export default function Round2AnswerPage() {
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
-        <p className="text-sm text-navy/60">ROUND 2 · 대표자 답안 제출</p>
+        <p className="text-sm text-navy/60">ROUND 2 · CAPTAIN 답안 제출</p>
         <h1 className="text-3xl font-extrabold text-navy">
           우리 팀의 정답 빙고판을 완성하세요
         </h1>
         <p className="text-sm text-navy/60 mt-2">
-          완료 {completedCount} / 25 · 제출하면 팀원들이 이 답을 예측하게
-          돼요.
+          완료 {completedCount} / 25 · 팀당 한 번만 제출할 수 있고 제출 후에는
+          수정할 수 없어요.
         </p>
       </div>
 
       <div className="bg-navy rounded-3xl p-6 shadow-xl">
+        {error && <p className="text-accentB text-sm mb-4">{error}</p>}
         <div className="grid grid-cols-5 gap-2">
           {grid.map((row) =>
             row.map((cell) => {
@@ -144,7 +157,7 @@ export default function Round2AnswerPage() {
           disabled={completedCount < 25 || submitting || submitted}
           className="w-full mt-6 bg-accentA hover:bg-blue-500 transition text-white font-bold py-3 rounded-xl disabled:opacity-40"
         >
-          {submitted ? "제출 완료" : submitting ? "제출 중..." : "제출하기"}
+          {submitted ? "CAPTAIN 제출 완료 · 수정 불가" : submitting ? "제출 중..." : "CAPTAIN으로 제출하기"}
         </button>
       </div>
     </main>

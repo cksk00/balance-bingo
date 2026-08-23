@@ -10,7 +10,8 @@ create table if not exists teams (
 );
 
 insert into teams (name) values
-  ('TEAM 1'), ('TEAM 2'), ('TEAM 3'), ('TEAM 4'), ('TEAM 5')
+  ('TEAM 1'), ('TEAM 2'), ('TEAM 3'), ('TEAM 4'),
+  ('TEAM 5'), ('TEAM 6'), ('TEAM 7'), ('TEAM 8')
 on conflict (name) do nothing;
 
 -- 참가자 테이블

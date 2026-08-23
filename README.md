@@ -52,6 +52,13 @@ Vercel 프로젝트 **Settings > Environment Variables**에 아래 세 개가 �
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `ADMIN_PASSWORD` (관리자 화면 로그인 비밀번호 — 새로 추가해야 함)
 
+## 추가 마이그레이션
+
+기존 DB에는 `supabase/schema_v3.sql`을 SQL Editor에서 한 번 실행합니다.
+이 마이그레이션은 TEAM 6~8, ROUND 2 순위 공개 상태, CAPTAIN/일반 답안 제출 후 수정 잠금을 추가합니다.
+
+ROUND 2 순위는 팀원 다수결 빙고의 정확도 60점과 CAPTAIN 제출 이후 팀원 평균 제출시간의 상대점수 40점을 합산합니다.
+
 환경변수를 추가/수정한 뒤에는 **Deployments 탭 > 최신 배포 > Redeploy**를 한 번 눌러줘야 반영돼요.
 
 ## 진행 흐름 (세미나 당일)

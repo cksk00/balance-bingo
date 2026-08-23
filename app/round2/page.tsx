@@ -9,9 +9,8 @@ export default function Round2EntryPage() {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [teamId, setTeamId] = useState<number | null>(null);
   const [teamName, setTeamName] = useState("");
-  const [repPlayerId, setRepPlayerId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [captainId, setCaptainId] = useState<string | null>(null);
+  const [rankingRevealed, setRankingRevealed] = useState(false);
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -33,37 +32,22 @@ export default function Round2EntryPage() {
       });
 
     supabase
-      .from("round2_reps")
-      .select("player_id")
+      .from("round2_answer_key")
+      .select("submitted_by")
       .eq("team_id", Number(tid))
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setRepPlayerId(data.player_id);
+        if (data) setCaptainId(data.submitted_by);
       });
+    supabase
+      .from("game_state")
+      .select("round2_ranking_revealed")
+      .eq("id", 1)
+      .maybeSingle()
+      .then(({ data }) => setRankingRevealed(Boolean(data?.round2_ranking_revealed)));
   }, [router]);
 
-  async function claimRep() {
-    if (!teamId || !playerId) return;
-    setLoading(true);
-    setError("");
-    const { error: insertError } = await supabase
-      .from("round2_reps")
-      .insert({ team_id: teamId, player_id: playerId });
-    setLoading(false);
-    if (insertError) {
-      setError("이미 다른 팀원이 대표자로 지정됐어요. 새로고침해서 확인해주세요.");
-      const { data } = await supabase
-        .from("round2_reps")
-        .select("player_id")
-        .eq("team_id", teamId)
-        .maybeSingle();
-      if (data) setRepPlayerId(data.player_id);
-      return;
-    }
-    router.push("/round2/answer");
-  }
-
-  const iAmRep = repPlayerId === playerId;
+  const iAmCaptain = captainId === playerId;
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
@@ -71,45 +55,34 @@ export default function Round2EntryPage() {
         <p className="text-sm text-blue-200 mb-1">ROUND 2 · 대표자 밸런스 빙고</p>
         <h1 className="text-2xl font-extrabold mb-6">{teamName}</h1>
 
-        {error && <p className="text-accentB text-sm mb-4">{error}</p>}
+        <p className="text-sm text-blue-100 mb-6">
+          대표자는 왼쪽에서 CAPTAIN 빙고를 먼저 제출하고, 나머지 팀원은
+          오른쪽에서 대표자의 답을 예측해 제출하세요.
+        </p>
 
-        {repPlayerId === null && (
-          <>
-            <p className="text-sm text-blue-100 mb-6">
-              가위바위보로 정한 대표자만 아래 버튼을 눌러주세요. 나머지
-              팀원은 대표자의 답을 예측해서 빙고판을 완성하게 돼요.
-            </p>
-            <button
-              onClick={claimRep}
-              disabled={loading}
-              className="w-full bg-hit text-ink font-bold py-3 rounded-xl mb-3 disabled:opacity-50"
-            >
-              {loading ? "확인 중..." : "저는 대표자예요"}
-            </button>
-            <button
-              onClick={() => router.push("/round2/guess")}
-              className="w-full bg-white/10 hover:bg-white/20 transition font-semibold py-3 rounded-xl"
-            >
-              저는 예측할게요 (팀원)
-            </button>
-          </>
-        )}
-
-        {repPlayerId !== null && iAmRep && (
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push("/round2/answer")}
-            className="w-full bg-hit text-ink font-bold py-3 rounded-xl"
+            disabled={captainId !== null && !iAmCaptain}
+            className="bg-hit text-ink font-extrabold py-4 px-2 rounded-xl disabled:opacity-40"
           >
-            제 답안 작성하러 가기
+            {iAmCaptain ? "CAPTAIN 제출 완료" : "CAPTAIN으로 제출하기"}
           </button>
-        )}
-
-        {repPlayerId !== null && !iAmRep && (
           <button
             onClick={() => router.push("/round2/guess")}
-            className="w-full bg-accentA hover:bg-blue-500 transition font-bold py-3 rounded-xl"
+            disabled={captainId === null || iAmCaptain}
+            className="bg-accentA hover:bg-blue-500 transition font-bold py-4 px-2 rounded-xl disabled:opacity-40"
           >
-            대표자 답 예측하러 가기
+            {captainId === null ? "CAPTAIN 제출 대기" : "일반 제출하기"}
+          </button>
+        </div>
+
+        {rankingRevealed && (
+          <button
+            onClick={() => router.push("/round2/results")}
+            className="w-full mt-4 bg-accentB text-white font-bold py-3 rounded-xl"
+          >
+            ROUND 2 순위 보기
           </button>
         )}
       </div>

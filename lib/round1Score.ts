@@ -1,20 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-
-const ROWS = 5;
-const COLS = 5;
-
-function bingoLines(): number[][] {
-  const lines: number[][] = [];
-  for (let r = 0; r < ROWS; r++) {
-    lines.push(Array.from({ length: COLS }, (_, c) => r * COLS + c));
-  }
-  for (let c = 0; c < COLS; c++) {
-    lines.push(Array.from({ length: ROWS }, (_, r) => r * COLS + c));
-  }
-  lines.push(Array.from({ length: ROWS }, (_, i) => i * COLS + i));
-  lines.push(Array.from({ length: ROWS }, (_, i) => i * COLS + (COLS - 1 - i)));
-  return lines;
-}
+import { bingoLines } from "@/lib/bingoLines";
 
 /**
  * ROUND1 결과를 계산해서 저장하고, 팀별 점수까지 반영한다.

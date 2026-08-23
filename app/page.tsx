@@ -69,7 +69,7 @@ export default function HomePage() {
         <input
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
-          placeholder="예: 조혜린"
+          placeholder="예: 홍길동"
           className="w-full rounded-xl px-4 py-3 mb-6 text-ink bg-white outline-none focus:ring-2 focus:ring-accentA"
         />
 

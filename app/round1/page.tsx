@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { bingoLines } from "@/lib/bingoLines";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -148,6 +149,29 @@ export default function Round1Page() {
     return g;
   }, [cells]);
 
+  // 결과 공개 시: 내가 유효 칸을 골랐는지, 그 칸이 완성된 빙고 줄에 속하는지 계산
+  const { validMineFlags, litFlags } = useMemo(() => {
+    const validMine: boolean[] = Array(25).fill(false);
+    const lit: boolean[] = Array(25).fill(false);
+    if (!revealed) return { validMineFlags: validMine, litFlags: lit };
+
+    for (let i = 0; i < 25; i++) {
+      const mine = selections[i];
+      const valid = validChoices[i];
+      if (!mine || !valid) continue;
+      validMine[i] = valid === "HIT" || mine === valid;
+    }
+
+    for (const line of bingoLines()) {
+      const complete = line.every((i) => validMine[i]);
+      if (complete) {
+        for (const i of line) lit[i] = true;
+      }
+    }
+
+    return { validMineFlags: validMine, litFlags: lit };
+  }, [revealed, selections, validChoices]);
+
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
@@ -175,23 +199,24 @@ export default function Round1Page() {
             row.map((cell) => {
               const choice = selections[cell.cell_index];
               const valid = validChoices[cell.cell_index];
+              const isValidMine = validMineFlags[cell.cell_index];
+              const isLit = litFlags[cell.cell_index];
+              const isDimmed = revealed && valid !== undefined && !isValidMine;
               return (
                 <div
                   key={cell.cell_index}
-                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 ${
-                    revealed && valid ? "ring-2 ring-hit" : ""
-                  }`}
+                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
+                    isDimmed ? "opacity-30" : ""
+                  } ${isLit ? "scale-[1.03] shadow-lg shadow-accentA/40" : ""}`}
                 >
                   <button
                     onClick={() => toggle(cell.cell_index, "A")}
                     className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
                       choice === "A"
-                        ? "bg-accentA text-white"
+                        ? isLit
+                          ? "bg-accentA text-white brightness-125"
+                          : "bg-accentA text-white"
                         : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    } ${
-                      revealed && (valid === "A" || valid === "HIT")
-                        ? "outline outline-2 outline-hit"
-                        : ""
                     }`}
                   >
                     {cell.option_a}
@@ -200,12 +225,10 @@ export default function Round1Page() {
                     onClick={() => toggle(cell.cell_index, "B")}
                     className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
                       choice === "B"
-                        ? "bg-accentB text-white"
+                        ? isLit
+                          ? "bg-accentB text-white brightness-125"
+                          : "bg-accentB text-white"
                         : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    } ${
-                      revealed && (valid === "B" || valid === "HIT")
-                        ? "outline outline-2 outline-hit"
-                        : ""
                     }`}
                   >
                     {cell.option_b}

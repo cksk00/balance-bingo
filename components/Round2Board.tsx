@@ -19,7 +19,9 @@ export function Round2Board({
       <div className="grid grid-cols-5 gap-1.5 bg-navy rounded-2xl p-3">
         {cells.map((cell) => {
           const choice = answers[String(cell.cell_index)];
-          const matched = compareTo && choice && compareTo[String(cell.cell_index)] === choice;
+          const isMismatch = Boolean(
+            compareTo && choice !== compareTo[String(cell.cell_index)]
+          );
           return (
             <div
               key={cell.cell_index}
@@ -29,7 +31,7 @@ export function Round2Board({
                   : choice === "B"
                   ? "bg-accentB text-white"
                   : "bg-white/10 text-blue-100"
-              } ${matched ? "ring-2 ring-hit brightness-125" : ""}`}
+              } ${isMismatch ? "opacity-[0.12] brightness-50 grayscale" : ""}`}
             >
               {choice === "A"
                 ? cell.option_a

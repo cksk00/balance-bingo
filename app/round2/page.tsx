@@ -41,10 +41,10 @@ export default function Round2EntryPage() {
       });
     supabase
       .from("game_state")
-      .select("round2_ranking_revealed")
+      .select("round2_revealed")
       .eq("id", 1)
       .maybeSingle()
-      .then(({ data }) => setRankingRevealed(Boolean(data?.round2_ranking_revealed)));
+      .then(({ data }) => setRankingRevealed(Boolean(data?.round2_revealed)));
   }, [router]);
 
   const iAmCaptain = captainId === playerId;

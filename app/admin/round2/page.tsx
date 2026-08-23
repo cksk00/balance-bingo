@@ -26,7 +26,7 @@ export default function AdminRound2Page() {
       supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
       supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       supabase.from("players").select("id, nickname"),
-      supabase.from("game_state").select("round2_ranking_revealed").eq("id", 1).maybeSingle(),
+      supabase.from("game_state").select("round2_revealed").eq("id", 1).maybeSingle(),
     ]);
     const nicknameById = new Map(((playersRes.data || []) as { id: string; nickname: string }[]).map((p) => [p.id, p.nickname]));
     const nextCaptains = (captainsRes.data || []) as CaptainSubmission[];
@@ -35,7 +35,7 @@ export default function AdminRound2Page() {
     setCaptains(nextCaptains);
     setGuesses(nextGuesses);
     setRankings(calculateRound2Rankings(nextCaptains, nextGuesses));
-    setRankingRevealed(Boolean(stateRes.data?.round2_ranking_revealed));
+    setRankingRevealed(Boolean(stateRes.data?.round2_revealed));
   }, []);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function AdminRound2Page() {
   async function revealRankings() {
     if (rankings.length === 0 || !confirm("현재 실시간 순위를 참가자에게 공개할까요?")) return;
     setBusy(true); setError("");
-    const { error: updateError } = await supabase.from("game_state").update({ round2_ranking_revealed: true, round2_revealed: true }).eq("id", 1);
+    const { error: updateError } = await supabase.from("game_state").update({ round2_revealed: true }).eq("id", 1);
     if (updateError) setError(updateError.message);
     await refresh(); setBusy(false);
   }
@@ -65,7 +65,7 @@ export default function AdminRound2Page() {
       supabase.from("round2_answer_key").delete().not("team_id", "is", null),
       supabase.from("round2_team_results").update({ match_count: 0, match_percent: 0, revealed: false }).not("team_id", "is", null),
       supabase.from("team_scores").update({ round2: 0 }).not("team_id", "is", null),
-      supabase.from("game_state").update({ round2_revealed: false, round2_ranking_revealed: false }).eq("id", 1),
+      supabase.from("game_state").update({ round2_revealed: false }).eq("id", 1),
     ]);
     const failed = results.find((result) => result.error)?.error;
     if (failed) setError(failed.message);

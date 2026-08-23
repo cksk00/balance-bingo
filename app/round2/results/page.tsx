@@ -26,12 +26,12 @@ export default function Round2ResultsPage() {
   const refresh = useCallback(async () => {
     const [{ data: state }, { data: teamData }, { data: captains }, { data: guesses }] =
       await Promise.all([
-        supabase.from("game_state").select("round2_ranking_revealed").eq("id", 1).maybeSingle(),
+        supabase.from("game_state").select("round2_revealed").eq("id", 1).maybeSingle(),
         supabase.from("teams").select("id, name").order("id"),
         supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
         supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       ]);
-    if (!state?.round2_ranking_revealed) {
+    if (!state?.round2_revealed) {
       router.push("/round2");
       return;
     }

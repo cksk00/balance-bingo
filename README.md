@@ -55,7 +55,7 @@ Vercel 프로젝트 **Settings > Environment Variables**에 아래 세 개가 �
 ## 추가 마이그레이션
 
 기존 DB에는 `supabase/schema_v3.sql`을 SQL Editor에서 한 번 실행합니다.
-이 마이그레이션은 TEAM 6~8, ROUND 2 순위 공개 상태, CAPTAIN/일반 답안 제출 후 수정 잠금을 추가합니다.
+이 마이그레이션은 TEAM 6~8과 CAPTAIN/일반 답안 제출 후 수정 잠금을 추가합니다.
 
 이어서 `supabase/schema_v4.sql`을 실행합니다. ROUND 1 문항 25개를 교체하고
 ROUND 2 전용 `round2_cells` 테이블과 문항 25개를 추가합니다.

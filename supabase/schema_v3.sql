@@ -14,9 +14,6 @@ insert into round2_team_results (team_id)
 select id from teams
 on conflict (team_id) do nothing;
 
-alter table game_state
-  add column if not exists round2_ranking_revealed boolean not null default false;
-
 -- 캡틴 답안은 팀당 1개이며 한번 생성된 뒤에는 수정할 수 없다.
 create or replace function prevent_round2_captain_update()
 returns trigger

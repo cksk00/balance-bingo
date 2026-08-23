@@ -6,12 +6,13 @@ import { supabase } from "@/lib/supabaseClient";
 import { calculateRound2Rankings, formatDuration, type CaptainSubmission, type GuessSubmission, type Round2RankingRow } from "@/lib/round2Ranking";
 import { Round2Board } from "@/components/Round2Board";
 import { ROUND2_CELLS } from "@/lib/questions";
+import { TEAMS } from "@/lib/teams";
 
 type Team = { id: number; name: string };
 type Cell = { cell_index: number; option_a: string; option_b: string };
 
 export default function AdminRound2Page() {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams] = useState<Team[]>(TEAMS);
   const [cells] = useState<Cell[]>(ROUND2_CELLS);
   const [captains, setCaptains] = useState<CaptainSubmission[]>([]);
   const [guesses, setGuesses] = useState<GuessSubmission[]>([]);
@@ -21,8 +22,7 @@ export default function AdminRound2Page() {
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    const [teamsRes, captainsRes, guessesRes, playersRes, stateRes] = await Promise.all([
-      supabase.from("teams").select("id, name").order("id"),
+    const [captainsRes, guessesRes, playersRes, stateRes] = await Promise.all([
       supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
       supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       supabase.from("players").select("id, nickname"),
@@ -31,7 +31,6 @@ export default function AdminRound2Page() {
     const nicknameById = new Map(((playersRes.data || []) as { id: string; nickname: string }[]).map((p) => [p.id, p.nickname]));
     const nextCaptains = (captainsRes.data || []) as CaptainSubmission[];
     const nextGuesses = ((guessesRes.data || []) as GuessSubmission[]).map((g) => ({ ...g, players: { nickname: nicknameById.get(g.player_id) || "알 수 없음" } }));
-    setTeams((teamsRes.data || []) as Team[]);
     setCaptains(nextCaptains);
     setGuesses(nextGuesses);
     setRankings(calculateRound2Rankings(nextCaptains, nextGuesses));

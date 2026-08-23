@@ -3,26 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { TEAMS } from "@/lib/teams";
 
 type Team = { id: number; name: string };
 
 export default function HomePage() {
   const router = useRouter();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams] = useState<Team[]>(TEAMS);
   const [nickname, setNickname] = useState("");
   const [teamId, setTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase
-      .from("teams")
-      .select("id, name")
-      .order("id")
-      .then(({ data }) => {
-        if (data) setTeams(data as Team[]);
-      });
-
     const existing = localStorage.getItem("bb_player_id");
     if (existing) {
       router.push("/round1");

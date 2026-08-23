@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { TEAMS } from "@/lib/teams";
 
 type Row = {
   team_id: number;
@@ -14,6 +15,7 @@ type Row = {
 
 export default function AdminScoresPage() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [adjustingTeamId, setAdjustingTeamId] = useState<number | null>(null);
 
   const refresh = useCallback(async () => {
     const { data } = await supabase
@@ -21,7 +23,7 @@ export default function AdminScoresPage() {
       .select("team_id, icebreaking, round1, round2, teams(name)")
       .order("team_id");
     if (!data) return;
-    const mapped = (
+    const scoreByTeam = new Map((
       data as unknown as {
         team_id: number;
         icebreaking: number;
@@ -29,13 +31,17 @@ export default function AdminScoresPage() {
         round2: number;
         teams: { name: string } | null;
       }[]
-    ).map((r) => ({
-      team_id: r.team_id,
-      name: r.teams?.name || `TEAM ${r.team_id}`,
-      icebreaking: r.icebreaking,
-      round1: r.round1,
-      round2: r.round2,
-    }));
+    ).map((row) => [row.team_id, row]));
+    const mapped = TEAMS.map((team) => {
+      const score = scoreByTeam.get(team.id);
+      return {
+        team_id: team.id,
+        name: team.name,
+        icebreaking: score?.icebreaking || 0,
+        round1: score?.round1 || 0,
+        round2: score?.round2 || 0,
+      };
+    });
     setRows(mapped);
   }, []);
 
@@ -55,22 +61,23 @@ export default function AdminScoresPage() {
   }, [refresh]);
 
   async function adjustIcebreaking(teamId: number, delta: number) {
-    const row = rows.find((r) => r.team_id === teamId);
-    if (!row) return;
-    const next = Math.max(0, row.icebreaking + delta);
+    if (adjustingTeamId !== null) return;
+    setAdjustingTeamId(teamId);
+    const { data } = await supabase
+      .from("team_scores")
+      .select("icebreaking")
+      .eq("team_id", teamId)
+      .maybeSingle();
+    const current = data?.icebreaking || 0;
+    const next = Math.max(0, current + delta);
     setRows((prev) =>
       prev.map((r) => (r.team_id === teamId ? { ...r, icebreaking: next } : r))
     );
     await supabase
       .from("team_scores")
-      .update({ icebreaking: next })
-      .eq("team_id", teamId);
+      .upsert({ team_id: teamId, icebreaking: next }, { onConflict: "team_id" });
+    setAdjustingTeamId(null);
   }
-
-  const sorted = [...rows].sort(
-    (a, b) =>
-      b.icebreaking + b.round1 + b.round2 - (a.icebreaking + a.round1 + a.round2)
-  );
 
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
@@ -82,13 +89,13 @@ export default function AdminScoresPage() {
       </h1>
 
       <div className="space-y-3">
-        {sorted.map((r, idx) => {
+        {rows.map((r) => {
           const total = r.icebreaking + r.round1 + r.round2;
           return (
             <div key={r.team_id} className="bg-white rounded-2xl p-5 shadow">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-navy/40 font-bold w-5">{idx + 1}</span>
+                  <span className="text-navy/40 font-bold w-5">{r.team_id}</span>
                   <p className="font-bold text-navy text-lg">{r.name}</p>
                 </div>
                 <p className="text-2xl font-extrabold text-accentA">{total}</p>
@@ -103,12 +110,14 @@ export default function AdminScoresPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => adjustIcebreaking(r.team_id, -10)}
+                  disabled={adjustingTeamId === r.team_id}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 transition rounded-xl py-2 font-bold text-navy"
                 >
                   -10
                 </button>
                 <button
                   onClick={() => adjustIcebreaking(r.team_id, 10)}
+                  disabled={adjustingTeamId === r.team_id}
                   className="flex-1 bg-accentA hover:bg-blue-500 transition rounded-xl py-2 font-bold text-white"
                 >
                   +10

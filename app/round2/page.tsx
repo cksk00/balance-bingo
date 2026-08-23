@@ -44,7 +44,11 @@ export default function Round2EntryPage() {
       .select("round2_revealed")
       .eq("id", 1)
       .maybeSingle()
-      .then(({ data }) => setRankingRevealed(Boolean(data?.round2_revealed)));
+      .then(({ data }) => {
+        const isRevealed = Boolean(data?.round2_revealed);
+        setRankingRevealed(isRevealed);
+        if (isRevealed) router.push("/round2/results");
+      });
   }, [router]);
 
   useEffect(() => {
@@ -56,6 +60,7 @@ export default function Round2EntryPage() {
         (payload) => {
           const state = payload.new as { round2_revealed?: boolean };
           setRankingRevealed(Boolean(state.round2_revealed));
+          if (state.round2_revealed) router.push("/round2/results");
         }
       )
       .subscribe();
@@ -63,7 +68,7 @@ export default function Round2EntryPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [router]);
 
   const iAmCaptain = captainId === playerId;
 

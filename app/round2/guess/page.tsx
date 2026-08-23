@@ -67,6 +67,30 @@ export default function Round2GuessPage() {
       });
   }, [teamId, playerId, router]);
 
+  useEffect(() => {
+    supabase
+      .from("game_state")
+      .select("round2_revealed")
+      .eq("id", 1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.round2_revealed) router.push("/round2/results");
+      });
+
+    const channel = supabase
+      .channel("round2-guess-reveal")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "game_state", filter: "id=eq.1" },
+        (payload) => {
+          const state = payload.new as { round2_revealed?: boolean };
+          if (state.round2_revealed) router.push("/round2/results");
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [router]);
+
   function toggle(cellIndex: number, choice: "A" | "B") {
     if (submitted) return;
     setSelections((prev) => {

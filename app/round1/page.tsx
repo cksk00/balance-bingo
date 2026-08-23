@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { bingoLines } from "@/lib/bingoLines";
 import { ROUND1_CELLS } from "@/lib/questions";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
@@ -140,10 +139,9 @@ export default function Round1Page() {
   }, [cells]);
 
   // 결과 공개 시: 내가 유효 칸을 골랐는지, 그 칸이 완성된 빙고 줄에 속하는지 계산
-  const completedLines = useMemo(() => {
+  const validMineFlags = useMemo(() => {
     const validMine: boolean[] = Array(25).fill(false);
-    const completed: number[][] = [];
-    if (!revealed) return completed;
+    if (!revealed) return validMine;
 
     for (let i = 0; i < 25; i++) {
       const mine = selections[i];
@@ -152,12 +150,7 @@ export default function Round1Page() {
       validMine[i] = valid === "HIT" || mine === valid;
     }
 
-    for (const line of bingoLines()) {
-      const complete = line.every((i) => validMine[i]);
-      if (complete) completed.push(line);
-    }
-
-    return completed;
+    return validMine;
   }, [revealed, selections, validChoices]);
 
   return (
@@ -194,10 +187,14 @@ export default function Round1Page() {
           {grid.map((row) =>
             row.map((cell) => {
               const choice = selections[cell.cell_index];
+              const valid = validChoices[cell.cell_index];
+              const isDimmed = revealed && valid !== undefined && !validMineFlags[cell.cell_index];
               return (
                 <div
                   key={cell.cell_index}
-                  className="relative z-10 bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition"
+                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
+                    isDimmed ? "opacity-20" : ""
+                  }`}
                 >
                   <button
                     onClick={() => toggle(cell.cell_index, "A")}
@@ -222,33 +219,6 @@ export default function Round1Page() {
                 </div>
               );
             })
-          )}
-          {completedLines.length > 0 && (
-            <svg
-              className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              {completedLines.map((line, index) => {
-                const first = line[0];
-                const last = line[line.length - 1];
-                const row = Math.floor(first / COLS);
-                const col = first % COLS;
-                const isHorizontal = Math.floor(last / COLS) === row;
-                const isVertical = last % COLS === col;
-                if (isHorizontal) {
-                  return <rect key={`${first}-${last}-${index}`} x="0.7" y={row * 20 + 0.7} width="98.6" height="18.6" rx="2.5" fill="none" stroke="#FFC53D" strokeWidth="2" vectorEffect="non-scaling-stroke" />;
-                }
-                if (isVertical) {
-                  return <rect key={`${first}-${last}-${index}`} x={col * 20 + 0.7} y="0.7" width="18.6" height="98.6" rx="2.5" fill="none" stroke="#FFC53D" strokeWidth="2" vectorEffect="non-scaling-stroke" />;
-                }
-                const points = first === 0
-                  ? "-3,10 10,-3 103,90 90,103"
-                  : "90,-3 103,10 10,103 -3,90";
-                return <polygon key={`${first}-${last}-${index}`} points={points} fill="none" stroke="#FFC53D" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />;
-              })}
-            </svg>
           )}
         </div>
 

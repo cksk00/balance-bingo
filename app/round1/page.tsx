@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { bingoLines } from "@/lib/bingoLines";
+import { ROUND1_CELLS } from "@/lib/questions";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -16,7 +17,7 @@ type ValidChoice = "A" | "B" | "HIT";
 export default function Round1Page() {
   const router = useRouter();
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [cells] = useState<Cell[]>(ROUND1_CELLS);
   const [selections, setSelections] = useState<Choice[]>(Array(25).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -84,17 +85,6 @@ export default function Round1Page() {
     }
     setPlayerId(id);
   }, [router]);
-
-  // 빙고 칸 구성 로드
-  useEffect(() => {
-    supabase
-      .from("round1_cells")
-      .select("cell_index, option_a, option_b")
-      .order("cell_index")
-      .then(({ data }) => {
-        if (data) setCells(data as Cell[]);
-      });
-  }, []);
 
   // 내 기존 응답 불러오기
   useEffect(() => {

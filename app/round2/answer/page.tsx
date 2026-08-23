@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { ROUND2_CELLS } from "@/lib/questions";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -14,7 +15,7 @@ export default function Round2AnswerPage() {
   const router = useRouter();
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [teamId, setTeamId] = useState<number | null>(null);
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [cells] = useState<Cell[]>(ROUND2_CELLS);
   const [selections, setSelections] = useState<Choice[]>(Array(25).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -30,16 +31,6 @@ export default function Round2AnswerPage() {
     setPlayerId(pid);
     setTeamId(Number(tid));
   }, [router]);
-
-  useEffect(() => {
-    supabase
-      .from("round2_cells")
-      .select("cell_index, option_a, option_b")
-      .order("cell_index")
-      .then(({ data }) => {
-        if (data) setCells(data as Cell[]);
-      });
-  }, []);
 
   useEffect(() => {
     if (!teamId) return;

@@ -5,13 +5,14 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { calculateRound2Rankings, formatDuration, type CaptainSubmission, type GuessSubmission, type Round2RankingRow } from "@/lib/round2Ranking";
 import { Round2Board } from "@/components/Round2Board";
+import { ROUND2_CELLS } from "@/lib/questions";
 
 type Team = { id: number; name: string };
 type Cell = { cell_index: number; option_a: string; option_b: string };
 
 export default function AdminRound2Page() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [cells] = useState<Cell[]>(ROUND2_CELLS);
   const [captains, setCaptains] = useState<CaptainSubmission[]>([]);
   const [guesses, setGuesses] = useState<GuessSubmission[]>([]);
   const [rankings, setRankings] = useState<Round2RankingRow[]>([]);
@@ -20,9 +21,8 @@ export default function AdminRound2Page() {
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    const [teamsRes, cellsRes, captainsRes, guessesRes, playersRes, stateRes] = await Promise.all([
+    const [teamsRes, captainsRes, guessesRes, playersRes, stateRes] = await Promise.all([
       supabase.from("teams").select("id, name").order("id"),
-      supabase.from("round2_cells").select("cell_index, option_a, option_b").order("cell_index"),
       supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
       supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       supabase.from("players").select("id, nickname"),
@@ -32,7 +32,6 @@ export default function AdminRound2Page() {
     const nextCaptains = (captainsRes.data || []) as CaptainSubmission[];
     const nextGuesses = ((guessesRes.data || []) as GuessSubmission[]).map((g) => ({ ...g, players: { nickname: nicknameById.get(g.player_id) || "알 수 없음" } }));
     setTeams((teamsRes.data || []) as Team[]);
-    setCells((cellsRes.data || []) as Cell[]);
     setCaptains(nextCaptains);
     setGuesses(nextGuesses);
     setRankings(calculateRound2Rankings(nextCaptains, nextGuesses));

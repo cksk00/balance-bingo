@@ -11,6 +11,7 @@ import {
   type Round2RankingRow,
 } from "@/lib/round2Ranking";
 import { Round2Board } from "@/components/Round2Board";
+import { ROUND2_CELLS } from "@/lib/questions";
 
 type Team = { id: number; name: string };
 type Cell = { cell_index: number; option_a: string; option_b: string };
@@ -18,16 +19,15 @@ type Cell = { cell_index: number; option_a: string; option_b: string };
 export default function Round2ResultsPage() {
   const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [cells] = useState<Cell[]>(ROUND2_CELLS);
   const [rankings, setRankings] = useState<Round2RankingRow[]>([]);
   const [showAll, setShowAll] = useState(false);
 
   const refresh = useCallback(async () => {
-    const [{ data: state }, { data: teamData }, { data: cellData }, { data: captains }, { data: guesses }] =
+    const [{ data: state }, { data: teamData }, { data: captains }, { data: guesses }] =
       await Promise.all([
         supabase.from("game_state").select("round2_ranking_revealed").eq("id", 1).maybeSingle(),
         supabase.from("teams").select("id, name").order("id"),
-        supabase.from("round2_cells").select("cell_index, option_a, option_b").order("cell_index"),
         supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
         supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
       ]);
@@ -36,7 +36,6 @@ export default function Round2ResultsPage() {
       return;
     }
     setTeams((teamData || []) as Team[]);
-    setCells((cellData || []) as Cell[]);
     setRankings(
       calculateRound2Rankings(
         (captains || []) as CaptainSubmission[],

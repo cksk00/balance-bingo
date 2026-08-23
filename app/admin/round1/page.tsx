@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { revealRound1 } from "@/lib/round1Score";
+import { ROUND1_CELLS } from "@/lib/questions";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Tally = { A: number; B: number };
@@ -11,7 +12,7 @@ type Tally = { A: number; B: number };
 const COLS = 5;
 
 export default function AdminRound1Page() {
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [cells] = useState<Cell[]>(ROUND1_CELLS);
   const [tallies, setTallies] = useState<Tally[]>(
     Array.from({ length: 25 }, () => ({ A: 0, B: 0 }))
   );
@@ -22,13 +23,6 @@ export default function AdminRound1Page() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase
-      .from("round1_cells")
-      .select("cell_index, option_a, option_b")
-      .order("cell_index")
-      .then(({ data }) => {
-        if (data) setCells(data as Cell[]);
-      });
     supabase
       .from("game_state")
       .select("round1_revealed")

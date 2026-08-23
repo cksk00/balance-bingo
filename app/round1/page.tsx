@@ -174,10 +174,18 @@ export default function Round1Page() {
       </div>
 
       {revealed && (
-        <div className="mb-6 bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
-          {bingoCount > 0
-            ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
-            : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
+        <div className="mb-6 space-y-3">
+          <div className="bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
+            {bingoCount > 0
+              ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
+              : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
+          </div>
+          <button
+            onClick={() => router.push("/round2")}
+            className="w-full bg-accentB hover:opacity-90 transition text-white text-lg font-extrabold py-4 rounded-xl shadow-lg"
+          >
+            ROUND 2로 넘어가기 →
+          </button>
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUND1_CELLS } from "@/lib/questions";
+import { bingoLines } from "@/lib/bingoLines";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -139,9 +140,10 @@ export default function Round1Page() {
   }, [cells]);
 
   // 결과 공개 시: 내가 유효 칸을 골랐는지, 그 칸이 완성된 빙고 줄에 속하는지 계산
-  const validMineFlags = useMemo(() => {
+  const { validMineFlags, bingoCellFlags } = useMemo(() => {
     const validMine: boolean[] = Array(25).fill(false);
-    if (!revealed) return validMine;
+    const bingoCells: boolean[] = Array(25).fill(false);
+    if (!revealed) return { validMineFlags: validMine, bingoCellFlags: bingoCells };
 
     for (let i = 0; i < 25; i++) {
       const mine = selections[i];
@@ -150,7 +152,13 @@ export default function Round1Page() {
       validMine[i] = valid === "HIT" || mine === valid;
     }
 
-    return validMine;
+    for (const line of bingoLines()) {
+      if (line.every((index) => validMine[index])) {
+        for (const index of line) bingoCells[index] = true;
+      }
+    }
+
+    return { validMineFlags: validMine, bingoCellFlags: bingoCells };
   }, [revealed, selections, validChoices]);
 
   return (
@@ -189,13 +197,17 @@ export default function Round1Page() {
               const choice = selections[cell.cell_index];
               const valid = validChoices[cell.cell_index];
               const isDimmed = revealed && valid !== undefined && !validMineFlags[cell.cell_index];
+              const isBingoCell = bingoCellFlags[cell.cell_index];
               return (
                 <div
                   key={cell.cell_index}
-                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
+                  className={`relative overflow-hidden bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
                     isDimmed ? "opacity-[0.12] brightness-50 grayscale" : ""
                   }`}
                 >
+                  {isBingoCell && (
+                    <div className="pointer-events-none absolute inset-0 z-20 bg-[#FFF3A3]/30" />
+                  )}
                   <button
                     onClick={() => toggle(cell.cell_index, "A")}
                     className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${

@@ -85,12 +85,11 @@ export default function AdminScoresPage() {
         ← 대시보드
       </Link>
       <h1 className="text-3xl font-extrabold text-navy mt-2 mb-6">
-        점수 관리
+        아이스브레이킹 점수
       </h1>
 
       <div className="space-y-3">
         {rows.map((r) => {
-          const total = r.icebreaking + r.round1 + r.round2;
           return (
             <div key={r.team_id} className="bg-white rounded-2xl p-5 shadow">
               <div className="flex items-center justify-between mb-3">
@@ -98,13 +97,7 @@ export default function AdminScoresPage() {
                   <span className="text-navy/40 font-bold w-5">{r.team_id}</span>
                   <p className="font-bold text-navy text-lg">{r.name}</p>
                 </div>
-                <p className="text-2xl font-extrabold text-accentA">{total}</p>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-navy/70 mb-3">
-                <span>R1 {r.round1}점</span>
-                <span>R2 {r.round2}점</span>
-                <span>아이스브레이킹 {r.icebreaking}점</span>
+                <p className="text-2xl font-extrabold text-accentA">{r.icebreaking}점</p>
               </div>
 
               <div className="flex items-center gap-2">

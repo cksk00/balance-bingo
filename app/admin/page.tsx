@@ -14,7 +14,7 @@ export default function AdminHome() {
   const links = [
     { href: "/admin/round1", label: "ROUND 1 관리", desc: "실시간 통계 · 결과 공개 · 초기화" },
     { href: "/admin/round2", label: "ROUND 2 관리", desc: "CAPTAIN/팀 빙고 · 실시간 6:4 순위 · 초기화" },
-    { href: "/admin/scores", label: "점수 관리", desc: "아이스브레이킹 점수 입력 · 최종 순위" },
+    { href: "/admin/scores", label: "아이스브레이킹 점수", desc: "아이스브레이킹 타임 점수 입력" },
   ];
 
   return (

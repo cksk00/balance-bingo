@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import {
   calculateRound2Rankings,
-  formatDuration,
   type CaptainSubmission,
   type GuessSubmission,
   type Round2RankingRow,
@@ -24,22 +23,27 @@ export default function Round2ResultsPage() {
   const [showAll, setShowAll] = useState(false);
 
   const refresh = useCallback(async () => {
-    const [{ data: state }, { data: teamData }, { data: captains }, { data: guesses }] =
+    const [{ data: state }, { data: teamData }, { data: captains }, { data: guesses }, { data: scores }] =
       await Promise.all([
         supabase.from("game_state").select("round2_revealed").eq("id", 1).maybeSingle(),
         supabase.from("teams").select("id, name").order("id"),
         supabase.from("round2_answer_key").select("team_id, answers, created_at, submitted_by"),
         supabase.from("round2_guesses").select("player_id, team_id, answers, created_at"),
+        supabase.from("team_scores").select("team_id, icebreaking"),
       ]);
     if (!state?.round2_revealed) {
       router.push("/round2");
       return;
     }
     setTeams((teamData || []) as Team[]);
+    const icebreakingScores = Object.fromEntries(
+      ((scores || []) as { team_id: number; icebreaking: number }[]).map((score) => [score.team_id, score.icebreaking])
+    );
     setRankings(
       calculateRound2Rankings(
         (captains || []) as CaptainSubmission[],
-        (guesses || []) as GuessSubmission[]
+        (guesses || []) as GuessSubmission[],
+        icebreakingScores
       )
     );
   }, [router]);
@@ -50,6 +54,7 @@ export default function Round2ResultsPage() {
       .channel("round2-public-rankings")
       .on("postgres_changes", { event: "*", schema: "public", table: "round2_guesses" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "game_state" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "team_scores" }, refresh)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [refresh]);
@@ -66,7 +71,7 @@ export default function Round2ResultsPage() {
             <p className="text-5xl mb-2">🏆</p>
             <p className="text-4xl font-extrabold text-navy">1위 · {teamName(winner.teamId)}</p>
             <p className="text-navy/60 mt-2">
-              정답률 {winner.matchPercent}% · {winner.matchCount}/25개 · 빙고 {winner.bingoCount}줄 (+{winner.bingoBonus}점) · 평균 {formatDuration(winner.averageSeconds)} · 종합 {winner.totalScore.toFixed(1)}점
+              캡틴 빙고 {winner.captainBingoScore}점 · 개인 합계 {winner.individualScore}점 · 아이스브레이킹 {winner.icebreakingScore}점 · 종합 {winner.totalScore}점
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -84,8 +89,8 @@ export default function Round2ResultsPage() {
         <section className="space-y-3">
           {rankings.map((row) => (
             <div key={row.teamId} className="bg-white rounded-2xl p-5 shadow flex items-center justify-between">
-              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">빙고 {row.bingoCount}줄 (+{row.bingoBonus}점) · 평균 제출 {formatDuration(row.averageSeconds)} · 종합 {row.totalScore.toFixed(1)}점</p></div>
-              <p className="text-right font-bold text-navy">정답률 {row.matchPercent}%<br /><span className="text-sm">{row.matchCount}/25개</span></p>
+              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">캡틴 빙고 {row.captainBingoScore}점 · 개인 합계 {row.individualScore}점 · 아이스브레이킹 {row.icebreakingScore}점</p></div>
+              <p className="text-right font-bold text-navy">총 {row.totalScore}점<br /><span className="text-sm">{row.matchCount}/25 · 빙고 {row.bingoCount}줄</span></p>
             </div>
           ))}
         </section>

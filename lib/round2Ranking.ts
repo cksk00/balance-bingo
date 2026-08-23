@@ -27,16 +27,24 @@ export type Round2RankingRow = {
   matchPercent: number;
   bingoCount: number;
   bingoBonus: number;
+  captainBingoScore: number;
+  individualScore: number;
+  individualScores: {
+    playerId: string;
+    matchCount: number;
+    bingoCount: number;
+    score: number;
+  }[];
+  icebreakingScore: number;
   averageSeconds: number;
-  answerScore: number;
-  timeScore: number;
   totalScore: number;
   rank: number;
 };
 
 export function calculateRound2Rankings(
   captains: CaptainSubmission[],
-  guesses: GuessSubmission[]
+  guesses: GuessSubmission[],
+  icebreakingScores: Record<number, number> = {}
 ): Round2RankingRow[] {
   const rows = captains
     .map((captain) => {
@@ -69,6 +77,25 @@ export function calculateRound2Rankings(
         line.every((index) => matchedFlags[index])
       ).length;
       const bingoBonus = bingoCount * 10;
+      const individualScores = teamGuesses.map((guess) => {
+        const flags = Array.from(
+          { length: 25 },
+          (_, index) => guess.answers[String(index)] === captain.answers[String(index)]
+        );
+        const individualMatchCount = flags.filter(Boolean).length;
+        const individualBingoCount = bingoLines().filter((line) =>
+          line.every((index) => flags[index])
+        ).length;
+        return {
+          playerId: guess.player_id,
+          matchCount: individualMatchCount,
+          bingoCount: individualBingoCount,
+          score: individualMatchCount + individualBingoCount * 10,
+        };
+      });
+      const captainBingoScore = matchCount + bingoBonus;
+      const individualScore = individualScores.reduce((sum, score) => sum + score.score, 0);
+      const icebreakingScore = icebreakingScores[captain.team_id] || 0;
       const averageSeconds =
         teamGuesses.reduce((sum, guess) => {
           const elapsed = Math.max(0, new Date(guess.created_at).getTime() - captainTime);
@@ -84,32 +111,23 @@ export function calculateRound2Rankings(
         matchPercent: Math.round((matchCount / 25) * 100),
         bingoCount,
         bingoBonus,
+        captainBingoScore,
+        individualScore,
+        individualScores,
+        icebreakingScore,
         averageSeconds,
-        answerScore: matchCount,
-        timeScore: 0,
-        totalScore: 0,
+        totalScore: captainBingoScore + individualScore + icebreakingScore,
         rank: 0,
       } satisfies Round2RankingRow;
     })
     .filter((row): row is Round2RankingRow => row !== null);
 
-  const times = rows.map((row) => row.averageSeconds);
-  const fastest = Math.min(...times);
-  const slowest = Math.max(...times);
-
-  for (const row of rows) {
-    const normalizedTime =
-      fastest === slowest ? 1 : (slowest - row.averageSeconds) / (slowest - fastest);
-    row.timeScore = normalizedTime * 40;
-    row.totalScore = row.answerScore + row.bingoBonus + row.timeScore;
-  }
-
   rows.sort(
     (a, b) =>
       b.totalScore - a.totalScore ||
-      b.bingoCount - a.bingoCount ||
-      b.matchCount - a.matchCount ||
-      a.averageSeconds - b.averageSeconds ||
+      b.captainBingoScore - a.captainBingoScore ||
+      b.individualScore - a.individualScore ||
+      b.icebreakingScore - a.icebreakingScore ||
       a.teamId - b.teamId
   );
   rows.forEach((row, index) => {

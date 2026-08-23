@@ -47,6 +47,24 @@ export default function Round2EntryPage() {
       .then(({ data }) => setRankingRevealed(Boolean(data?.round2_revealed)));
   }, [router]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("round2-ranking-reveal")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "game_state", filter: "id=eq.1" },
+        (payload) => {
+          const state = payload.new as { round2_revealed?: boolean };
+          setRankingRevealed(Boolean(state.round2_revealed));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const iAmCaptain = captainId === playerId;
 
   return (

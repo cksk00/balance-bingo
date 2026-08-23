@@ -150,10 +150,13 @@ export default function Round1Page() {
   }, [cells]);
 
   // 결과 공개 시: 내가 유효 칸을 골랐는지, 그 칸이 완성된 빙고 줄에 속하는지 계산
-  const { validMineFlags, litFlags } = useMemo(() => {
+  const { validMineFlags, litFlags, completedLines } = useMemo(() => {
     const validMine: boolean[] = Array(25).fill(false);
     const lit: boolean[] = Array(25).fill(false);
-    if (!revealed) return { validMineFlags: validMine, litFlags: lit };
+    const completed: number[][] = [];
+    if (!revealed) {
+      return { validMineFlags: validMine, litFlags: lit, completedLines: completed };
+    }
 
     for (let i = 0; i < 25; i++) {
       const mine = selections[i];
@@ -165,11 +168,12 @@ export default function Round1Page() {
     for (const line of bingoLines()) {
       const complete = line.every((i) => validMine[i]);
       if (complete) {
+        completed.push(line);
         for (const i of line) lit[i] = true;
       }
     }
 
-    return { validMineFlags: validMine, litFlags: lit };
+    return { validMineFlags: validMine, litFlags: lit, completedLines: completed };
   }, [revealed, selections, validChoices]);
 
   return (
@@ -194,7 +198,7 @@ export default function Round1Page() {
       )}
 
       <div className="bg-navy rounded-3xl p-6 shadow-xl">
-        <div className="grid grid-cols-5 gap-2">
+        <div className="relative grid grid-cols-5 gap-2">
           {grid.map((row) =>
             row.map((cell) => {
               const choice = selections[cell.cell_index];
@@ -205,7 +209,7 @@ export default function Round1Page() {
               return (
                 <div
                   key={cell.cell_index}
-                  className={`bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
+                  className={`relative z-10 bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
                     isDimmed ? "opacity-30" : ""
                   } ${isLit ? "scale-[1.03] shadow-lg shadow-accentA/40" : ""}`}
                 >
@@ -236,6 +240,50 @@ export default function Round1Page() {
                 </div>
               );
             })
+          )}
+          {completedLines.length > 0 && (
+            <svg
+              className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {completedLines.map((line, index) => {
+                const first = line[0];
+                const last = line[line.length - 1];
+                const x1 = ((first % COLS) + 0.5) * 20;
+                const y1 = (Math.floor(first / COLS) + 0.5) * 20;
+                const x2 = ((last % COLS) + 0.5) * 20;
+                const y2 = (Math.floor(last / COLS) + 0.5) * 20;
+                return (
+                  <g key={`${first}-${last}-${index}`}>
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#FFF36D"
+                      strokeWidth="13"
+                      strokeLinecap="round"
+                      opacity="0.45"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#FF2D55"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      opacity="0.95"
+                      vectorEffect="non-scaling-stroke"
+                      style={{ filter: "drop-shadow(0 0 4px rgba(255,45,85,.9))" }}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
           )}
         </div>
 

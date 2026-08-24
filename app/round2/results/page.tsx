@@ -64,7 +64,7 @@ export default function Round2ResultsPage() {
 
   return (
     <main className="min-h-screen px-4 py-10 max-w-5xl mx-auto">
-      <h1 className="text-4xl font-extrabold text-navy text-center mb-8">ROUND 2 순위</h1>
+      <h1 className="text-4xl font-extrabold text-navy text-center mb-8">seKUrity 빙고 세션 순위</h1>
       {winner && (
         <section className="bg-white rounded-3xl p-6 shadow-xl mb-8">
           <div className="text-center mb-6">

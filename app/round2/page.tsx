@@ -75,7 +75,7 @@ export default function Round2EntryPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-navy text-white rounded-3xl p-8 shadow-xl">
-        <p className="text-sm text-blue-200 mb-1">ROUND 2 · 대표자 밸런스 빙고</p>
+        <p className="text-sm text-blue-200 mb-1">seKUrity 빙고 세션</p>
         <h1 className="text-2xl font-extrabold mb-6">{teamName}</h1>
 
         <p className="text-sm text-blue-100 mb-6">

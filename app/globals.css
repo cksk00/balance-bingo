@@ -3,6 +3,85 @@
 @tailwind utilities;
 
 body {
-  background: #eef1f8;
+  background: #eaf1ff;
   color: #0b1130;
+  font-family: ui-rounded, "Arial Rounded MT Bold", "Pretendard", system-ui, sans-serif;
+}
+
+main:not(.landing-page) {
+  background-color: #edf4ff;
+  background-image:
+    radial-gradient(circle at 8% 12%, rgba(36, 105, 235, 0.12) 0 3px, transparent 4px),
+    radial-gradient(circle at 92% 18%, rgba(36, 105, 235, 0.1) 0 2px, transparent 3px),
+    linear-gradient(180deg, #f4f8ff 0%, #e5efff 100%);
+  background-size: 90px 90px, 120px 120px, 100% 100%;
+}
+
+.landing-page {
+  position: relative;
+  background:
+    radial-gradient(circle at 74% 38%, rgba(30, 129, 255, 0.75), transparent 35%),
+    radial-gradient(circle at 10% 78%, rgba(19, 116, 238, 0.7), transparent 32%),
+    linear-gradient(135deg, #07349c 0%, #075be0 55%, #063aa7 100%);
+}
+
+.landing-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, #fff 0 2px, transparent 2.5px),
+    radial-gradient(circle, #b9dcff 0 1px, transparent 1.5px);
+  background-position: 20px 35px, 70px 10px;
+  background-size: 120px 120px, 85px 85px;
+  mask-image: linear-gradient(to bottom, transparent 5%, #000 22%, #000 85%, transparent 100%);
+}
+
+.retro-logo,
+.retro-title {
+  color: #fff6df;
+  font-weight: 1000;
+  letter-spacing: -0.055em;
+  text-shadow: 0 5px 0 #163a96, 0 8px 18px rgba(0, 22, 88, 0.35);
+}
+
+.retro-logo {
+  font-size: 2rem;
+  line-height: 1;
+  transform: rotate(-3deg);
+}
+
+.retro-logo span { color: #b7ddff; margin-left: 0.08em; }
+.hero-logo { display: inline-block; font-size: clamp(3.8rem, 9vw, 6.5rem); }
+
+.cream-button {
+  border-radius: 999px;
+  background: #fff0c8;
+  color: #15377e;
+  box-shadow: 0 7px 0 rgba(18, 47, 125, 0.55), 0 14px 25px rgba(0, 25, 94, 0.28);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.cream-button:hover { transform: translateY(-2px); box-shadow: 0 9px 0 rgba(18, 47, 125, 0.55), 0 17px 28px rgba(0, 25, 94, 0.32); }
+.cream-button:active { transform: translateY(4px); box-shadow: 0 3px 0 rgba(18, 47, 125, 0.55); }
+
+.preview-board { isolation: isolate; }
+.preview-board > div:not(.marker-line) { position: relative; z-index: 1; }
+.marker-line {
+  position: absolute;
+  z-index: 3;
+  border-radius: 999px;
+  background: rgba(255, 221, 54, 0.58);
+  box-shadow: 0 0 10px rgba(255, 230, 67, 0.45);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.marker-horizontal { left: 1%; right: 1%; top: 27%; height: 8%; transform: rotate(-1deg); }
+.marker-vertical { top: 1%; bottom: 1%; left: 66%; width: 8%; transform: rotate(1deg); }
+.marker-diagonal { left: 8%; top: 48%; width: 118%; height: 8%; transform: translate(-8%, -50%) rotate(45deg); transform-origin: center; }
+
+@media (max-width: 640px) {
+  .retro-logo { font-size: 1.65rem; }
+  .retro-title { text-shadow: 0 3px 0 #163a96, 0 6px 14px rgba(0, 22, 88, 0.35); }
 }

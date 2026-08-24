@@ -120,7 +120,7 @@ export default function Round2AnswerPage() {
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
-        <p className="text-sm text-navy/60">ROUND 2 · CAPTAIN 답안 제출</p>
+        <p className="text-sm text-navy/60">seKUrity 빙고 세션 · CAPTAIN 답안 제출</p>
         <h1 className="text-3xl font-extrabold text-navy">
           우리 팀의 정답 빙고판을 완성하세요
         </h1>

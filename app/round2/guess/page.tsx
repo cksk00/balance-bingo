@@ -131,7 +131,7 @@ export default function Round2GuessPage() {
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
-        <p className="text-sm text-navy/60">ROUND 2 · 대표자 답 예측</p>
+        <p className="text-sm text-navy/60">seKUrity 빙고 세션 · 대표자 답 예측</p>
         <h1 className="text-3xl font-extrabold text-navy">
           우리 팀 대표자가 골랐을 법한 답을 예측하세요
         </h1>

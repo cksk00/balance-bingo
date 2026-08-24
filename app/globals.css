@@ -67,7 +67,11 @@ main:not(.landing-page) {
 }
 
 .retro-logo span { color: #b7ddff; margin-left: 0.08em; }
-.hero-logo { display: inline-block; font-size: clamp(3.8rem, 9vw, 6.5rem); }
+.hero-logo {
+  display: inline-block;
+  font-size: clamp(3.8rem, 9vw, 6.5rem);
+  transform: translateY(-7px) rotate(-3deg);
+}
 
 .cream-button {
   border-radius: 999px;

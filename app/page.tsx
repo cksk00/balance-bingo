@@ -60,6 +60,8 @@ export default function HomePage() {
 
       {!started ? (
         <section className="relative z-10 mx-auto grid min-h-[calc(100vh-100px)] max-w-7xl items-center gap-12 py-12 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="landing-clouds landing-clouds-left" aria-hidden="true"><i /><i /><i /><i /></div>
+          <div className="landing-clouds landing-clouds-right" aria-hidden="true"><i /><i /><i /><i /></div>
           <div className="max-w-xl text-white">
             <p className="mb-5 text-lg font-extrabold tracking-wide text-blue-100">seKUrity 빙고 세션</p>
             <h1 className="retro-title mb-6 text-6xl leading-[1.08] md:text-7xl">밸런스 빙고<br />챌린지</h1>
@@ -68,6 +70,16 @@ export default function HomePage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-2xl">
+            <div className="board-ornaments" aria-hidden="true">
+              <span className="ornament ornament-lock">▣<b>⌁</b></span>
+              <span className="ornament ornament-code">&lt;/&gt;</span>
+              <span className="ornament ornament-shield">◆</span>
+              <span className="ornament ornament-star-one">★</span>
+              <span className="ornament ornament-star-two">✦</span>
+              <span className="ornament ornament-star-three">★</span>
+              <span className="ornament ornament-spark-one">✦</span>
+              <span className="ornament ornament-spark-two">✧</span>
+            </div>
             <div className="mb-4 text-center text-white"><div className="retro-logo hero-logo">BINGO<span>★</span></div><p className="mt-1 inline-block rounded-full bg-blue-100 px-8 py-1 text-sm font-extrabold tracking-wider text-blue-800">seKUrity 빙고 세션</p></div>
             <div className="preview-board-stack relative">
               <div className="preview-board-back" aria-hidden="true" />

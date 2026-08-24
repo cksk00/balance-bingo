@@ -69,7 +69,7 @@ export default function HomePage() {
             <button onClick={() => setStarted(true)} className="cream-button px-12 py-5 text-xl font-extrabold md:text-2xl">빙고판 시작하기 <span className="ml-4">→</span></button>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[420px] lg:-translate-x-6 lg:-translate-y-4">
+          <div className="relative mx-auto w-full max-w-[420px] lg:-translate-x-6">
             <div className="board-ornaments" aria-hidden="true">
               <span className="ornament ornament-code">&lt;/&gt;</span>
               <span className="ornament ornament-shield">◆</span>

@@ -117,14 +117,14 @@ main:not(.landing-page) {
   width: 390px;
   height: 105px;
   border-radius: 999px;
-  background: rgba(105, 181, 247, 0.82);
+  background: #69b5f7;
 }
 .landing-clouds i::before,
 .landing-clouds i::after {
   content: "";
   position: absolute;
   border-radius: 50%;
-  background: rgba(105, 181, 247, 0.82);
+  background: #69b5f7;
 }
 .landing-clouds i::before { left: 58px; bottom: 43px; width: 154px; height: 132px; }
 .landing-clouds i::after { left: 185px; bottom: 48px; width: 132px; height: 118px; }

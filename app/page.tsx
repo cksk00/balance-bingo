@@ -54,7 +54,7 @@ export default function HomePage() {
         ))}
       </div>
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between border-b border-white/20 pb-5">
-        <div className="retro-logo">BINGO<span>★</span></div>
+        <div className="retro-logo landing-header-logo">BINGO<span>★</span></div>
         <p className="hidden text-sm font-bold tracking-[0.25em] text-blue-100 md:block">seKUrity BINGO SESSION</p>
       </header>
 

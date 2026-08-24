@@ -71,16 +71,23 @@ export default function HomePage() {
             <div className="mb-4 text-center text-white"><div className="retro-logo hero-logo">BINGO<span>★</span></div><p className="mt-1 inline-block rounded-full bg-blue-100 px-8 py-1 text-sm font-extrabold tracking-wider text-blue-800">seKUrity 빙고 세션</p></div>
             <div className="preview-board relative grid grid-cols-5 overflow-hidden rounded-2xl border-[6px] border-[#143d9e] bg-[#fff8e8] shadow-2xl">
               {previewQuestions.map(([left, right], index) => <div key={index} className="flex aspect-square flex-col items-center justify-center border border-blue-900/35 p-1 text-center text-[8px] font-extrabold leading-tight text-[#14316f] sm:text-[10px]"><span>{left}</span><span className="my-0.5 text-[7px] text-blue-500">VS</span><span>{right}</span></div>)}
-              <div className="marker-line marker-horizontal" />
-              <div className="marker-line marker-vertical" />
               <svg className="pointer-events-none absolute inset-0 z-[3] h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <defs>
-                  <filter id="rough-marker" x="-10%" y="-10%" width="120%" height="120%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="8" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.7" xChannelSelector="R" yChannelSelector="G" />
+                  <filter id="rough-pencil" x="-10%" y="-10%" width="120%" height="120%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="12" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.15" xChannelSelector="R" yChannelSelector="G" />
                   </filter>
                 </defs>
-                <line x1="7" y1="7" x2="93" y2="93" stroke="rgba(255,218,0,.36)" strokeWidth="8" strokeLinecap="butt" filter="url(#rough-marker)" />
+                <g fill="none" stroke="#f04432" strokeWidth="1.7" strokeLinecap="round" filter="url(#rough-pencil)" opacity="0.88">
+                  <ellipse cx="50" cy="30" rx="48" ry="8.5" pathLength="100" strokeDasharray="94 6" strokeDashoffset="2" />
+                  <ellipse cx="70" cy="50" rx="8.5" ry="48" pathLength="100" strokeDasharray="94 6" strokeDashoffset="7" />
+                  <ellipse cx="50" cy="50" rx="58" ry="7.5" transform="rotate(45 50 50)" pathLength="100" strokeDasharray="94 6" strokeDashoffset="4" />
+                </g>
+                <g fill="none" stroke="#ff5a43" strokeWidth="0.65" opacity="0.45" transform="translate(.35 -.25)">
+                  <ellipse cx="50" cy="30" rx="47.5" ry="8" />
+                  <ellipse cx="70" cy="50" rx="8" ry="47.5" />
+                  <ellipse cx="50" cy="50" rx="57.5" ry="7" transform="rotate(45 50 50)" />
+                </g>
               </svg>
             </div>
           </div>

@@ -74,7 +74,13 @@ export default function HomePage() {
               <div className="marker-line marker-horizontal" />
               <div className="marker-line marker-vertical" />
               <svg className="pointer-events-none absolute inset-0 z-[3] h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <line x1="9" y1="9" x2="91" y2="91" stroke="rgba(255,221,54,.58)" strokeWidth="7" strokeLinecap="round" />
+                <defs>
+                  <filter id="rough-marker" x="-10%" y="-10%" width="120%" height="120%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="8" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.7" xChannelSelector="R" yChannelSelector="G" />
+                  </filter>
+                </defs>
+                <line x1="7" y1="7" x2="93" y2="93" stroke="rgba(255,224,0,.30)" strokeWidth="8" strokeLinecap="butt" filter="url(#rough-marker)" />
               </svg>
             </div>
           </div>

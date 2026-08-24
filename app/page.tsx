@@ -80,7 +80,7 @@ export default function HomePage() {
                     <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.7" xChannelSelector="R" yChannelSelector="G" />
                   </filter>
                 </defs>
-                <line x1="7" y1="7" x2="93" y2="93" stroke="rgba(255,224,0,.30)" strokeWidth="8" strokeLinecap="butt" filter="url(#rough-marker)" />
+                <line x1="7" y1="7" x2="93" y2="93" stroke="rgba(255,218,0,.36)" strokeWidth="8" strokeLinecap="butt" filter="url(#rough-marker)" />
               </svg>
             </div>
           </div>

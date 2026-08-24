@@ -59,6 +59,10 @@ main:not(.landing-page) {
   text-shadow: 0 5px 0 #163a96, 0 8px 18px rgba(0, 22, 88, 0.35);
 }
 
+.landing-copy .retro-title {
+  font-family: "RiaSans", ui-rounded, sans-serif;
+}
+
 .retro-logo {
   font-family: "RiaSans", ui-rounded, sans-serif;
   font-size: 2rem;
@@ -146,21 +150,25 @@ main:not(.landing-page) {
   text-shadow: 0 4px 0 rgba(13, 51, 140, 0.7), 0 0 16px rgba(185, 224, 255, 0.7);
   line-height: 1;
 }
-.ornament-code { left: -8%; top: 45%; font-size: 25px; font-weight: 1000; transform: rotate(-8deg); }
+.ornament-code { left: -14%; top: 45%; font-size: 25px; font-weight: 1000; transform: rotate(-8deg); }
 .ornament-shield { right: 2%; top: -2%; font-size: 30px; transform: rotate(17deg); }
 .ornament-star-one { left: -5%; top: 15%; font-size: 24px; transform: rotate(-15deg); }
 .ornament-star-two { right: -5%; top: 13%; font-size: 21px; }
 .ornament-star-three { left: -6%; bottom: 5%; font-size: 34px; transform: rotate(12deg); }
 .ornament-spark-one { right: -4%; bottom: 5%; font-size: 26px; }
 .ornament-spark-two { left: 8%; top: 2%; font-size: 16px; }
+.ornament-braces { right: -13%; top: 52%; font-size: 24px; font-weight: 1000; transform: rotate(8deg); }
+.ornament-diamond { right: -10%; bottom: 24%; font-size: 17px; transform: rotate(-12deg); }
 
 @media (max-width: 640px) {
   .retro-logo { font-size: 1.65rem; }
   .retro-title { text-shadow: 0 3px 0 #163a96, 0 6px 14px rgba(0, 22, 88, 0.35); }
   .preview-board-back { transform: translate(25px, 16px) rotate(5deg); }
-  .ornament-code { left: -2%; top: 42%; transform: scale(0.75) rotate(-8deg); }
+  .ornament-code { left: -4%; top: 42%; transform: scale(0.75) rotate(-8deg); }
   .ornament-star-one, .ornament-star-three { left: -1%; }
   .ornament-star-two, .ornament-spark-one { right: 0; }
+  .ornament-braces { right: -2%; transform: scale(0.72) rotate(8deg); }
+  .ornament-diamond { right: 1%; }
   .landing-clouds { transform: scale(0.78); transform-origin: bottom left; opacity: 0.5; }
   .landing-clouds-right { transform: scale(-0.78, 0.78); transform-origin: bottom right; }
   .landing-copy { position: relative; z-index: 5; transform: translateY(-14px); }

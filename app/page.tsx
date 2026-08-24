@@ -78,6 +78,8 @@ export default function HomePage() {
               <span className="ornament ornament-star-three">★</span>
               <span className="ornament ornament-spark-one">✦</span>
               <span className="ornament ornament-spark-two">✧</span>
+              <span className="ornament ornament-braces">&#123; &#125;</span>
+              <span className="ornament ornament-diamond">✦</span>
             </div>
             <div className="mb-4 text-center text-white"><div className="retro-logo hero-logo">BINGO<span>★</span></div><p className="mt-1 inline-block rounded-full bg-blue-100 px-8 py-1 text-sm font-extrabold tracking-wider text-blue-800">seKUrity 빙고 세션</p></div>
             <div className="preview-board-stack relative">

@@ -6,11 +6,18 @@ import { supabase } from "@/lib/supabaseClient";
 import { TEAMS } from "@/lib/teams";
 
 const previewQuestions = [
-  "다크모드", "Codex", "터미널", "오픈소스", "클라우드",
-  "C언어", "웹 해킹", "GUI", "새벽 코딩", "커스텀 키보드",
-  "Git rebase", "백엔드", "Linux", "문서 먼저", "Windows",
-  "버그 헌팅", "모니터 2대", "AI 코딩", "CTF", "코드 리뷰",
-  "Python", "로컬 개발", "마우스", "VS Code", "아침 코딩",
+  ["다크모드", "라이트모드"], ["Claude", "Codex"], ["VS Code", "JetBrains"], ["Mac", "Windows"], ["Tab", "Space"],
+  ["프론트엔드", "백엔드"], ["SQL", "NoSQL"], ["모놀리식", "MSA"], ["Vim", "Nano"], ["GitHub", "GitLab"],
+  ["REST", "GraphQL"], ["Docker", "로컬 실행"], ["Python", "JavaScript"], ["터미널", "GUI"], ["마우스", "트랙패드"],
+  ["클라우드", "온프레미스"], ["문서 먼저", "코드 먼저"], ["테스트 먼저", "배포 먼저"], ["아침 코딩", "새벽 코딩"], ["오픈소스", "상용 SW"],
+  ["AI 페어코딩", "혼자 코딩"], ["PR 리뷰", "라이브 리뷰"], ["재택근무", "오피스"], ["핫픽스", "롤백"], ["CLI", "IDE"],
+];
+
+const stars = [
+  [6, 20, 18], [13, 72, 12], [20, 34, 9], [28, 88, 15], [36, 14, 10],
+  [44, 66, 18], [52, 26, 11], [61, 91, 8], [69, 12, 15], [76, 75, 10],
+  [84, 31, 17], [92, 62, 12], [9, 91, 8], [24, 54, 14], [39, 42, 8],
+  [57, 56, 15], [72, 44, 9], [88, 84, 18], [95, 17, 10], [48, 6, 12],
 ];
 
 export default function HomePage() {
@@ -41,7 +48,11 @@ export default function HomePage() {
 
   return (
     <main className="landing-page min-h-screen overflow-hidden px-5 py-6 md:px-10 md:py-8">
-      <div className="landing-stars" aria-hidden="true" />
+      <div className="landing-stars" aria-hidden="true">
+        {stars.map(([left, top, size], index) => (
+          <span key={index} style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}>★</span>
+        ))}
+      </div>
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between border-b border-white/20 pb-5">
         <div className="retro-logo">BINGO<span>★</span></div>
         <p className="hidden text-sm font-bold tracking-[0.25em] text-blue-100 md:block">seKUrity BINGO SESSION</p>
@@ -59,10 +70,12 @@ export default function HomePage() {
           <div className="relative mx-auto w-full max-w-2xl">
             <div className="mb-4 text-center text-white"><div className="retro-logo hero-logo">BINGO<span>★</span></div><p className="mt-1 inline-block rounded-full bg-blue-100 px-8 py-1 text-sm font-extrabold tracking-wider text-blue-800">seKUrity 빙고 세션</p></div>
             <div className="preview-board relative grid grid-cols-5 overflow-hidden rounded-2xl border-[6px] border-[#143d9e] bg-[#fff8e8] shadow-2xl">
-              {previewQuestions.map((question, index) => <div key={index} className="flex aspect-square items-center justify-center border border-blue-900/35 p-1 text-center text-[9px] font-extrabold leading-tight text-[#14316f] sm:text-[11px]">{question}</div>)}
+              {previewQuestions.map(([left, right], index) => <div key={index} className="flex aspect-square flex-col items-center justify-center border border-blue-900/35 p-1 text-center text-[8px] font-extrabold leading-tight text-[#14316f] sm:text-[10px]"><span>{left}</span><span className="my-0.5 text-[7px] text-blue-500">VS</span><span>{right}</span></div>)}
               <div className="marker-line marker-horizontal" />
               <div className="marker-line marker-vertical" />
-              <div className="marker-line marker-diagonal" />
+              <svg className="pointer-events-none absolute inset-0 z-[3] h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <line x1="9" y1="9" x2="91" y2="91" stroke="rgba(255,221,54,.58)" strokeWidth="7" strokeLinecap="round" />
+              </svg>
             </div>
           </div>
         </section>

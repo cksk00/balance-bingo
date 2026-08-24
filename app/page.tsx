@@ -60,8 +60,8 @@ export default function HomePage() {
 
       {!started ? (
         <section className="relative z-10 mx-auto grid min-h-[calc(100vh-100px)] max-w-7xl items-center gap-12 py-12 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="landing-clouds landing-clouds-left" aria-hidden="true"><i /><i /><i /><i /></div>
-          <div className="landing-clouds landing-clouds-right" aria-hidden="true"><i /><i /><i /><i /></div>
+          <div className="landing-clouds landing-clouds-left" aria-hidden="true"><i /></div>
+          <div className="landing-clouds landing-clouds-right" aria-hidden="true"><i /></div>
           <div className="landing-copy max-w-2xl text-white">
             <p className="mb-6 text-xl font-extrabold tracking-wide text-blue-100 md:text-2xl">seKUrity 빙고 세션</p>
             <h1 className="retro-title mb-7 text-7xl leading-[1.06] md:text-8xl">밸런스 빙고<br />챌린지</h1>

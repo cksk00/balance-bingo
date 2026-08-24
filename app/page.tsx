@@ -62,16 +62,15 @@ export default function HomePage() {
         <section className="relative z-10 mx-auto grid min-h-[calc(100vh-100px)] max-w-7xl items-center gap-12 py-12 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="landing-clouds landing-clouds-left" aria-hidden="true"><i /><i /><i /><i /></div>
           <div className="landing-clouds landing-clouds-right" aria-hidden="true"><i /><i /><i /><i /></div>
-          <div className="max-w-xl text-white">
-            <p className="mb-5 text-lg font-extrabold tracking-wide text-blue-100">seKUrity 빙고 세션</p>
-            <h1 className="retro-title mb-6 text-6xl leading-[1.08] md:text-7xl">밸런스 빙고<br />챌린지</h1>
-            <p className="mb-9 max-w-md text-lg leading-relaxed text-blue-100">서로의 선택을 맞혀 빙고를 완성하고<br />우리 팀의 순위를 확인해보세요.</p>
-            <button onClick={() => setStarted(true)} className="cream-button px-9 py-4 text-lg font-extrabold">빙고판 시작하기 <span className="ml-3">→</span></button>
+          <div className="landing-copy max-w-2xl text-white">
+            <p className="mb-6 text-xl font-extrabold tracking-wide text-blue-100 md:text-2xl">seKUrity 빙고 세션</p>
+            <h1 className="retro-title mb-7 text-7xl leading-[1.06] md:text-8xl">밸런스 빙고<br />챌린지</h1>
+            <p className="mb-10 max-w-xl text-xl leading-relaxed text-blue-100 md:text-2xl">서로의 선택을 맞혀 빙고를 완성하고<br />우리 팀의 순위를 확인해보세요.</p>
+            <button onClick={() => setStarted(true)} className="cream-button px-12 py-5 text-xl font-extrabold md:text-2xl">빙고판 시작하기 <span className="ml-4">→</span></button>
           </div>
 
           <div className="relative mx-auto w-full max-w-2xl">
             <div className="board-ornaments" aria-hidden="true">
-              <span className="ornament ornament-lock">▣<b>⌁</b></span>
               <span className="ornament ornament-code">&lt;/&gt;</span>
               <span className="ornament ornament-shield">◆</span>
               <span className="ornament ornament-star-one">★</span>

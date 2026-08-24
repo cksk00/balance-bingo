@@ -64,7 +64,7 @@ export default function HomePage() {
           <div className="landing-clouds landing-clouds-right" aria-hidden="true"><i /></div>
           <div className="landing-copy max-w-2xl text-white">
             <p className="mb-6 text-xl font-extrabold tracking-wide text-blue-100 md:text-2xl">seKUrity 빙고 세션</p>
-            <h1 className="retro-title mb-7 text-7xl leading-[1.06] md:text-8xl">밸런스 빙고<br />챌린지</h1>
+            <h1 className="retro-title mb-7 text-6xl leading-[1.18] md:text-7xl">밸런스 빙고<br />챌린지</h1>
             <p className="mb-10 max-w-xl text-xl leading-relaxed text-blue-100 md:text-2xl">서로의 선택을 맞혀 빙고를 완성하고<br />우리 팀의 순위를 확인해보세요.</p>
             <button onClick={() => setStarted(true)} className="cream-button px-12 py-5 text-xl font-extrabold md:text-2xl">빙고판 시작하기 <span className="ml-4">→</span></button>
           </div>

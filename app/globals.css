@@ -61,6 +61,7 @@ main:not(.landing-page) {
 
 .landing-copy .retro-title {
   font-family: "RiaSans", ui-rounded, sans-serif;
+  letter-spacing: 0.01em;
 }
 
 .retro-logo {

@@ -69,7 +69,7 @@ export default function HomePage() {
             <button onClick={() => setStarted(true)} className="cream-button px-12 py-5 text-xl font-extrabold md:text-2xl">빙고판 시작하기 <span className="ml-4">→</span></button>
           </div>
 
-          <div className="relative mx-auto w-full max-w-2xl">
+          <div className="relative mx-auto w-full max-w-xl">
             <div className="board-ornaments" aria-hidden="true">
               <span className="ornament ornament-code">&lt;/&gt;</span>
               <span className="ornament ornament-shield">◆</span>
@@ -83,7 +83,7 @@ export default function HomePage() {
             <div className="preview-board-stack relative">
               <div className="preview-board-back" aria-hidden="true" />
               <div className="preview-board relative z-[2] grid grid-cols-5 overflow-hidden rounded-2xl border-[6px] border-[#143d9e] bg-[#fff8e8] shadow-2xl">
-                {previewQuestions.map(([left, right], index) => <div key={index} className="flex aspect-square flex-col items-center justify-center border border-blue-900/35 p-1 text-center text-[8px] font-extrabold leading-tight text-[#14316f] sm:text-[10px]"><span>{left}</span><span className="my-0.5 text-[7px] text-blue-500">VS</span><span>{right}</span></div>)}
+                {previewQuestions.map(([left, right], index) => <div key={index} className="flex aspect-square flex-col items-center justify-center border border-blue-900/35 p-1 text-center text-[9px] font-extrabold leading-tight text-[#14316f] sm:text-[11px] md:text-[12px]"><span>{left}</span><span className="my-0.5 text-[8px] text-blue-500 sm:text-[9px]">VS</span><span>{right}</span></div>)}
               </div>
             </div>
           </div>

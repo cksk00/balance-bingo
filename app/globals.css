@@ -82,6 +82,20 @@ main:not(.landing-page) {
 
 .preview-board { isolation: isolate; }
 .preview-board > div { position: relative; z-index: 1; }
+.preview-board-back {
+  position: absolute;
+  inset: 1.5%;
+  z-index: 1;
+  border: 6px solid #173a91;
+  border-radius: 1rem;
+  background-color: #f7edcf;
+  background-image:
+    repeating-linear-gradient(to right, transparent 0 calc(20% - 0.6px), rgba(20, 52, 118, 0.32) calc(20% - 0.6px) calc(20% + 0.6px), transparent calc(20% + 0.6px) 20%),
+    repeating-linear-gradient(to bottom, transparent 0 calc(20% - 0.6px), rgba(20, 52, 118, 0.32) calc(20% - 0.6px) calc(20% + 0.6px), transparent calc(20% + 0.6px) 20%);
+  box-shadow: 0 20px 38px rgba(0, 25, 91, 0.34);
+  transform: translate(14px, 7px) rotate(3.2deg);
+  transform-origin: center;
+}
 
 @media (max-width: 640px) {
   .retro-logo { font-size: 1.65rem; }

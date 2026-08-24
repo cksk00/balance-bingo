@@ -119,22 +119,6 @@ main:not(.landing-page) {
 .landing-clouds i:nth-child(2) { left: 50px; bottom: 45px; width: 145px; height: 125px; }
 .landing-clouds i:nth-child(3) { left: 165px; bottom: 55px; width: 125px; height: 115px; }
 .landing-clouds i:nth-child(4) { left: 270px; bottom: 30px; width: 95px; height: 92px; }
-.landing-clouds::after {
-  content: "";
-  position: absolute;
-  left: 82px;
-  bottom: 24px;
-  width: 235px;
-  height: 72px;
-  border: 3px solid rgba(188, 228, 255, 0.36);
-  border-radius: 999px;
-  background: rgba(23, 111, 218, 0.26);
-  box-shadow:
-    -22px -22px 0 -4px rgba(23, 111, 218, 0.26),
-    54px -42px 0 5px rgba(23, 111, 218, 0.26),
-    126px -30px 0 -2px rgba(23, 111, 218, 0.26);
-}
-
 .board-ornaments {
   position: absolute;
   inset: 0;

@@ -41,7 +41,7 @@ export function QuestionFlow({ cells, selections, disabled, submitting, submitLa
         <div className="mb-7 flex items-center justify-between gap-3 text-sm text-blue-200">
           <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0} className="font-bold disabled:invisible">← 이전</button>
           <button onClick={() => setShowStatus(true)} className="rounded-full bg-white/10 px-4 py-2 font-extrabold">체크 현황 · {selections.filter(Boolean).length}/25</button>
-          <button onClick={() => setStep((current) => Math.min(25, current + 1))} className="font-bold">다음 →</button>
+          <button onClick={() => setStep((current) => Math.min(25, current + 1))} disabled={selected === null} className="font-bold disabled:cursor-not-allowed disabled:opacity-30">다음 →</button>
         </div>
         <div className="mb-8 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-hit transition-all" style={{ width: `${((step + 1) / 25) * 100}%` }} /></div>
         <p className="mb-5 text-center text-lg font-extrabold text-blue-100 sm:text-xl">{cell.prompt}</p>

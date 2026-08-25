@@ -103,6 +103,7 @@ export default function Round1Page() {
       return;
     }
     setPlayerId(id);
+    supabase.from("players").update({ current_round: 1 }).eq("id", id).then();
   }, [router]);
 
   // 내 기존 응답 불러오기

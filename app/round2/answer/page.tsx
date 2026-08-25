@@ -33,6 +33,7 @@ export default function Round2AnswerPage() {
     }
     setPlayerId(pid);
     setTeamId(Number(tid));
+    supabase.from("players").update({ current_round: 2 }).eq("id", pid).then();
   }, [router]);
 
   useEffect(() => {

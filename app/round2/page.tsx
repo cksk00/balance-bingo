@@ -23,6 +23,7 @@ export default function Round2EntryPage() {
     }
     setPlayerId(pid);
     setTeamId(Number(tid));
+    supabase.from("players").update({ current_round: 2 }).eq("id", pid).then();
 
     supabase
       .from("teams")

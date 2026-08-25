@@ -19,6 +19,8 @@ type QuestionFlowProps = {
 export function QuestionFlow({ cells, selections, disabled, submitting, submitLabel = "최종 제출하기", resultFlags, onChange, onSubmit }: QuestionFlowProps) {
   const firstEmpty = selections.findIndex((choice) => choice === null);
   const [step, setStep] = useState(firstEmpty === -1 ? 25 : firstEmpty);
+  const [showStatus, setShowStatus] = useState(false);
+  const allCompleted = selections.every((choice) => choice !== null);
 
   useEffect(() => {
     if (disabled) setStep(25);
@@ -35,9 +37,10 @@ export function QuestionFlow({ cells, selections, disabled, submitting, submitLa
     const selected = selections[step];
     return (
       <section className="mx-auto w-full max-w-xl rounded-3xl bg-navy p-6 text-white shadow-xl sm:p-9">
-        <div className="mb-7 flex items-center justify-between text-sm text-blue-200">
-          <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0} className="font-bold disabled:invisible">← 뒤로가기</button>
-          <span className="font-extrabold">{step + 1} / 25</span>
+        <div className="mb-7 flex items-center justify-between gap-3 text-sm text-blue-200">
+          <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0} className="font-bold disabled:invisible">← 이전</button>
+          <button onClick={() => setShowStatus(true)} className="rounded-full bg-white/10 px-4 py-2 font-extrabold">체크 현황 · {selections.filter(Boolean).length}/25</button>
+          <button onClick={() => setStep((current) => Math.min(25, current + 1))} className="font-bold">다음 →</button>
         </div>
         <div className="mb-8 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-hit transition-all" style={{ width: `${((step + 1) / 25) * 100}%` }} /></div>
         <p className="mb-5 text-center text-lg font-extrabold text-blue-100 sm:text-xl">{cell.prompt}</p>
@@ -46,6 +49,8 @@ export function QuestionFlow({ cells, selections, disabled, submitting, submitLa
           <span className="self-center text-center text-sm font-black text-hit">VS</span>
           <button onClick={() => choose("B")} className={`min-h-32 rounded-2xl p-5 text-lg font-extrabold transition sm:min-h-52 ${selected === "B" ? "bg-accentB ring-4 ring-white" : "bg-white/10 hover:bg-accentB"}`}>{cell.option_b}</button>
         </div>
+        {allCompleted && <button onClick={onSubmit} disabled={disabled || submitting} className="mt-5 w-full rounded-xl bg-hit py-4 font-extrabold text-ink disabled:opacity-40">{submitting ? "제출 중..." : submitLabel}</button>}
+        {showStatus && <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm" onClick={() => setShowStatus(false)}><div className="w-full max-w-md rounded-3xl bg-white p-6 text-navy shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">체크 현황</h2><p className="text-sm text-navy/60">완료 {selections.filter(Boolean).length}개 · 미선택 {selections.filter((choice) => !choice).length}개</p></div><button onClick={() => setShowStatus(false)} className="rounded-lg bg-gray-100 px-3 py-2 font-bold">닫기</button></div><div className="grid grid-cols-5 gap-2">{cells.map((statusCell) => { const statusChoice = selections[statusCell.cell_index]; return <button key={statusCell.cell_index} onClick={() => { setStep(statusCell.cell_index); setShowStatus(false); }} className={`aspect-square rounded-xl text-sm font-extrabold text-white ${statusChoice === "A" ? "bg-accentA" : statusChoice === "B" ? "bg-accentB" : "bg-gray-300 text-navy/60 ring-2 ring-dashed ring-red-400"}`}><span className="block">{statusCell.cell_index + 1}</span><span className="text-[10px]">{statusChoice || "미선택"}</span></button>; })}</div><p className="mt-4 text-center text-xs text-navy/60">수정하거나 선택할 문항 번호를 눌러주세요.</p></div></div>}
       </section>
     );
   }

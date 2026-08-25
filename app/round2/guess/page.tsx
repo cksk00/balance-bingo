@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { ROUND2_CELLS } from "@/lib/questions";
 import { QuestionFlow } from "@/components/QuestionFlow";
 import { WaitingScreen } from "@/components/WaitingScreen";
+import { ParticipantGreeting } from "@/components/ParticipantGreeting";
 
 type Cell = { cell_index: number; prompt: string; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -139,6 +140,7 @@ export default function Round2GuessPage() {
 
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
+      <ParticipantGreeting />
       <div className="mb-6">
         <p className="text-sm text-navy/60">seKUrity 빙고 세션 · 대표자 답 예측</p>
         <h1 className="text-3xl font-extrabold text-navy">

@@ -7,6 +7,7 @@ import { ROUND1_CELLS } from "@/lib/questions";
 import { bingoLines } from "@/lib/bingoLines";
 import { QuestionFlow } from "@/components/QuestionFlow";
 import { WaitingScreen } from "@/components/WaitingScreen";
+import { ParticipantGreeting } from "@/components/ParticipantGreeting";
 
 type Cell = { cell_index: number; prompt: string; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -195,6 +196,7 @@ export default function Round1Page() {
 
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
+      <ParticipantGreeting />
       <div className="mb-6">
         <p className="text-sm text-navy/60">ROUND 1 · 개인 밸런스 빙고</p>
         <h1 className="text-3xl font-extrabold text-navy">

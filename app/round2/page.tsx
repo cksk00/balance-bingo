@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { WaitingScreen } from "@/components/WaitingScreen";
+import { ParticipantGreeting } from "@/components/ParticipantGreeting";
 
 export default function Round2EntryPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function Round2EntryPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-navy text-white rounded-3xl p-8 shadow-xl">
+      <div className="w-full max-w-md"><ParticipantGreeting /><div className="bg-navy text-white rounded-3xl p-8 shadow-xl">
         <p className="text-sm text-blue-200 mb-1">seKUrity 빙고 세션</p>
         <h1 className="text-2xl font-extrabold mb-6">{teamName}</h1>
 
@@ -116,7 +117,7 @@ export default function Round2EntryPage() {
             ROUND 2 순위 보기
           </button>
         )}
-      </div>
+      </div></div>
     </main>
   );
 }

@@ -93,7 +93,6 @@ main:not(.landing-page)::before {
 }
 
 .retro-logo span { color: #b7ddff; margin-left: 0.08em; }
-.landing-header-logo { transform: translateY(-24px) rotate(-3deg); }
 .hero-logo {
   display: inline-block;
   font-size: clamp(3.8rem, 9vw, 6.5rem);
@@ -195,5 +194,4 @@ main:not(.landing-page)::before {
   .landing-clouds { transform: scale(0.78); transform-origin: bottom left; opacity: 0.5; }
   .landing-clouds-right { transform: scale(-0.78, 0.78); transform-origin: bottom right; }
   .landing-copy { position: relative; z-index: 5; transform: translateY(-14px); }
-  .landing-header-logo { transform: translateY(-12px) rotate(-3deg); }
 }

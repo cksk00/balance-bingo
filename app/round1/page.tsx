@@ -28,6 +28,7 @@ export default function Round1Page() {
   const [bingoCount, setBingoCount] = useState(0);
   const [roundStarted, setRoundStarted] = useState<boolean | null>(null);
   const [teamScore, setTeamScore] = useState(0);
+  const [movingToRound2, setMovingToRound2] = useState(false);
 
   // 결과 공개 상태 구독
   useEffect(() => {
@@ -151,6 +152,14 @@ export default function Round1Page() {
     if (!error) setSubmitted(true);
   }, [playerId, completedCount, selections]);
 
+  async function moveToRound2() {
+    if (!playerId) return;
+    setMovingToRound2(true);
+    const { error } = await supabase.from("players").update({ current_round: 2 }).eq("id", playerId);
+    setMovingToRound2(false);
+    if (!error) router.push("/round2");
+  }
+
   const grid = useMemo(() => {
     const g: Cell[][] = [];
     for (let r = 0; r < ROWS; r++) {
@@ -206,10 +215,11 @@ export default function Round1Page() {
             <div className="mt-3 grid grid-cols-2 gap-2 text-center"><p className="rounded-lg bg-blue-50 p-3">내 점수<br /><strong className="text-xl">{validMineFlags.filter(Boolean).length + bingoCount * 10}점</strong><br /><span className="text-xs text-navy/60">정답 {validMineFlags.filter(Boolean).length}개 + 빙고 {bingoCount}줄</span></p><p className="rounded-lg bg-blue-50 p-3">우리 팀 점수<br /><strong className="text-xl">{teamScore}점</strong><br /><span className="text-xs text-navy/60">팀원 개인 점수 합계</span></p></div>
           </div>
           <button
-            onClick={() => router.push("/round2")}
+            onClick={moveToRound2}
+            disabled={movingToRound2}
             className="w-full bg-accentB hover:opacity-90 transition text-white text-lg font-extrabold py-4 rounded-xl shadow-lg"
           >
-            ROUND 2로 넘어가기 →
+            {movingToRound2 ? "ROUND 2 입장 중..." : "ROUND 2로 넘어가기 →"}
           </button>
         </div>
       )}

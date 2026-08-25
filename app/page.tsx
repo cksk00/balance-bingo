@@ -35,7 +35,7 @@ export default function HomePage() {
     setLoading(true);
     const { data, error: insertError } = await supabase
       .from("players")
-      .insert({ nickname: nickname.trim(), team_id: teamId })
+      .insert({ nickname: nickname.trim(), team_id: teamId, current_round: 1 })
       .select("id")
       .single();
     setLoading(false);

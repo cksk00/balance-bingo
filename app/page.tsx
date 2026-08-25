@@ -24,8 +24,10 @@ export default function HomePage() {
   const [started, setStarted] = useState(false);
   const [nickname, setNickname] = useState("");
   const [loading, setLoading] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const [restoring, setRestoring] = useState(true);
   const [error, setError] = useState("");
+  const [pendingParticipant, setPendingParticipant] = useState<{ nickname: string; team_id: number; team_name: string } | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("bb_session_token");
@@ -54,11 +56,26 @@ export default function HomePage() {
     setError("");
     if (!nickname.trim()) return setError("닉네임을 입력해주세요.");
     setLoading(true);
-    const sessionToken = localStorage.getItem("bb_session_token") || crypto.randomUUID();
-    const { data, error: claimError } = await supabase
-      .rpc("claim_participant", { p_name: nickname.trim(), p_session_token: sessionToken })
+    const { data, error: lookupError } = await supabase
+      .rpc("lookup_participant", { p_name: nickname.trim() })
       .maybeSingle();
     setLoading(false);
+    if (lookupError || !data) {
+      if (!data && !lookupError) return setError("참가자 명단에서 이름을 찾을 수 없습니다. 실명을 정확히 입력해주세요.");
+      return setError("참가자 정보를 확인하지 못했어요. 다시 시도해주세요.");
+    }
+    setPendingParticipant(data as { nickname: string; team_id: number; team_name: string });
+  }
+
+  async function confirmJoin() {
+    if (!pendingParticipant) return;
+    setError("");
+    setClaiming(true);
+    const sessionToken = localStorage.getItem("bb_session_token") || crypto.randomUUID();
+    const { data, error: claimError } = await supabase
+      .rpc("claim_participant", { p_name: pendingParticipant.nickname, p_session_token: sessionToken })
+      .maybeSingle();
+    setClaiming(false);
     if (claimError || !data) {
       if (claimError?.message.includes("ALREADY_CLAIMED")) return setError("이미 다른 브라우저에서 입장한 이름입니다. 운영진에게 문의해주세요.");
       if (claimError?.message.includes("NAME_NOT_FOUND")) return setError("참가자 명단에서 이름을 찾을 수 없습니다. 실명을 정확히 입력해주세요.");
@@ -123,12 +140,20 @@ export default function HomePage() {
           <div className="w-full rounded-[2rem] border border-white/25 bg-[#073fae]/80 p-7 text-white shadow-2xl backdrop-blur md:p-10">
             <button onClick={() => setStarted(false)} className="mb-5 text-sm font-bold text-blue-200">← 돌아가기</button>
             <p className="text-sm font-bold tracking-[0.2em] text-blue-200">JOIN THE SESSION</p>
-            <h1 className="retro-title mb-3 mt-2 text-4xl">이름으로 입장하세요</h1>
-            <p className="mb-8 text-sm font-semibold text-blue-100">등록된 참가자 이름을 입력하면 배정된 팀으로 자동 입장합니다.</p>
-            <label className="mb-2 block text-sm font-bold text-blue-100">참가자 실명</label>
-            <input value={nickname} onChange={(event) => setNickname(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleJoin(); }} placeholder="예: 홍길동" autoComplete="name" maxLength={20} className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
-            {error && <p className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm font-bold text-red-100">{error}</p>}
-            <button onClick={handleJoin} disabled={loading} className="cream-button w-full py-4 text-lg font-extrabold disabled:opacity-50">{loading ? "계정 확인 중..." : "입장하기 →"}</button>
+            {!pendingParticipant ? <>
+              <h1 className="retro-title mb-3 mt-2 text-4xl">이름으로 입장하세요</h1>
+              <p className="mb-8 text-sm font-semibold text-blue-100">등록된 참가자 이름을 입력하면 배정된 팀으로 자동 입장합니다.</p>
+              <label className="mb-2 block text-sm font-bold text-blue-100">참가자 실명</label>
+              <input value={nickname} onChange={(event) => setNickname(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleJoin(); }} placeholder="예: 홍길동" autoComplete="name" maxLength={20} className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
+              {error && <p className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm font-bold text-red-100">{error}</p>}
+              <button onClick={handleJoin} disabled={loading} className="cream-button w-full py-4 text-lg font-extrabold disabled:opacity-50">{loading ? "계정 확인 중..." : "확인하기 →"}</button>
+            </> : <>
+              <p className="text-sm font-bold tracking-[0.2em] text-blue-200">CONFIRM YOUR ACCOUNT</p>
+              <h1 className="retro-title mb-4 mt-2 text-3xl">정말 {pendingParticipant.nickname}님이 맞으신가요?</h1>
+              <p className="mb-8 rounded-2xl bg-white/10 p-5 text-center text-xl font-extrabold"><span className="text-hit">{pendingParticipant.team_name}</span>으로 입장합니다.</p>
+              {error && <p className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm font-bold text-red-100">{error}</p>}
+              <div className="grid grid-cols-2 gap-3"><button onClick={() => { setPendingParticipant(null); setNickname(""); setError(""); }} disabled={claiming} className="rounded-full bg-white/10 py-4 font-extrabold text-white disabled:opacity-50">취소하기</button><button onClick={confirmJoin} disabled={claiming} className="cream-button py-4 font-extrabold disabled:opacity-50">{claiming ? "입장 중..." : "입장하기"}</button></div>
+            </>}
           </div>
         </section>
       )}

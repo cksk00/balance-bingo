@@ -4,8 +4,8 @@ import { bingoLines } from "@/lib/bingoLines";
 /**
  * ROUND1 결과를 계산해서 저장하고, 팀별 점수까지 반영한다.
  * - 각 칸: 다수 선택지가 유효 칸. 50:50이면 HIT (A/B 둘 다 유효)
- * - 유효 칸으로 가로/세로/대각선을 만든 참가자는 "빙고 달성"
- * - 빙고 달성한 참가자 수 * 10점을 해당 팀의 round1 점수로 반영
+ * - 개인 점수: 유효 선택지와 일치한 칸 수 + 완성한 빙고 줄 수 * 10
+ * - 팀 점수: 해당 팀 완주자들의 개인 점수 합계
  */
 export async function revealRound1() {
   const { data: answers, error: answersError } = await supabase
@@ -55,6 +55,7 @@ export async function revealRound1() {
 
   const lines = bingoLines();
   const winners: { player_id: string; team_id: number | null; bingo_count: number }[] = [];
+  const teamScoreTotals: Record<number, number> = {};
 
   const { data: players } = await supabase
     .from("players")
@@ -68,6 +69,12 @@ export async function revealRound1() {
     if (Object.keys(cellChoices).length < 25) continue; // 완주자만 판정
 
     let bingoCount = 0;
+    let matchedCount = 0;
+    for (let cellIndex = 0; cellIndex < 25; cellIndex++) {
+      const mine = cellChoices[cellIndex];
+      const valid = validMap[cellIndex];
+      if (mine && valid && (valid === "HIT" || mine === valid)) matchedCount++;
+    }
     for (const line of lines) {
       const allValid = line.every((cellIndex) => {
         const mine = cellChoices[cellIndex];
@@ -76,6 +83,12 @@ export async function revealRound1() {
         return valid === "HIT" || mine === valid;
       });
       if (allValid) bingoCount++;
+    }
+
+    const teamId = teamOf[playerId];
+    if (teamId != null) {
+      const personalScore = matchedCount + bingoCount * 10;
+      teamScoreTotals[teamId] = (teamScoreTotals[teamId] || 0) + personalScore;
     }
 
     if (bingoCount > 0) {
@@ -94,16 +107,10 @@ export async function revealRound1() {
     if (winnersError) throw winnersError;
   }
 
-  // 3. 팀별 점수 반영 (빙고 달성 인원수 * 10)
-  const teamWinnerCounts: Record<number, number> = {};
-  for (const w of winners) {
-    if (w.team_id == null) continue;
-    teamWinnerCounts[w.team_id] = (teamWinnerCounts[w.team_id] || 0) + 1;
-  }
-
+  // 3. 팀별 점수 반영 (팀원 개인 점수의 합)
   const { data: teams } = await supabase.from("teams").select("id");
   for (const team of (teams || []) as { id: number }[]) {
-    const score = (teamWinnerCounts[team.id] || 0) * 10;
+    const score = teamScoreTotals[team.id] || 0;
     await supabase
       .from("team_scores")
       .update({ round1: score })

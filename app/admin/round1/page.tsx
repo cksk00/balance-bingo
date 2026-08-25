@@ -144,8 +144,9 @@ export default function AdminRound1Page() {
           {revealing ? "계산 중..." : "결과 공개하기 (유효 칸 확정 + 점수 반영)"}
         </button>
       ) : (
-        <div className="mb-6 bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
-          결과가 공개되었어요. 참가자 화면에도 확정 결과가 보여요.
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-hit/20 border border-hit text-navy rounded-xl p-4 text-sm font-semibold">
+          <span>결과가 공개되었어요. 참가자 화면에도 확정 결과가 보여요.</span>
+          <button onClick={handleReveal} disabled={revealing} className="rounded-lg bg-navy px-4 py-2 text-white disabled:opacity-40">{revealing ? "계산 중..." : "점수 다시 계산"}</button>
         </div>
       )}
 

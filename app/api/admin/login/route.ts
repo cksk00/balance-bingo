@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAdminCookieValue } from "@/lib/adminAuth";
 
 export async function POST(request: Request) {
   const { password } = await request.json();
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("bb_admin", "1", {
+  res.cookies.set("bb_admin", await getAdminCookieValue(correct), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

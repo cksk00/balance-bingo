@@ -24,6 +24,7 @@ export default function Round2AnswerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [roundStarted, setRoundStarted] = useState<boolean | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -44,19 +45,43 @@ export default function Round2AnswerPage() {
       .select("answers, submitted_by")
       .eq("team_id", teamId)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!data) return;
-        if (data.submitted_by !== playerId) {
-          router.push("/round2");
-          return;
+      .then(async ({ data }) => {
+        const draftKey = `bb_round2_captain_draft_${playerId}`;
+        if (data) {
+          if (data.submitted_by !== playerId) {
+            router.push("/round2");
+            return;
+          }
+          const answers = data.answers as Record<string, "A" | "B">;
+          const next = Array(25).fill(null) as Choice[];
+          for (let i = 0; i < 25; i++) next[i] = answers[String(i)] ?? null;
+          setSelections(next);
+          if (next.every((v) => v !== null)) setSubmitted(true);
+          localStorage.removeItem(draftKey);
+        } else {
+          const { data: serverDraft } = await supabase.from("round2_drafts").select("answers").eq("player_id", playerId).eq("role", "captain").maybeSingle();
+          if (serverDraft?.answers) {
+            const answers = serverDraft.answers as Record<string, "A" | "B">;
+            setSelections(Array.from({ length: 25 }, (_, index) => answers[String(index)] ?? null));
+          } else try {
+              const saved = JSON.parse(localStorage.getItem(draftKey) || "null") as Choice[] | null;
+              if (Array.isArray(saved) && saved.length === 25) setSelections(saved);
+            } catch { localStorage.removeItem(draftKey); }
         }
-        const answers = data.answers as Record<string, "A" | "B">;
-        const next = Array(25).fill(null) as Choice[];
-        for (let i = 0; i < 25; i++) next[i] = answers[String(i)] ?? null;
-        setSelections(next);
-        if (next.every((v) => v !== null)) setSubmitted(true);
+        setDraftReady(true);
       });
   }, [teamId, playerId, router]);
+
+  useEffect(() => {
+    if (!playerId || !draftReady || submitted) return;
+    localStorage.setItem(`bb_round2_captain_draft_${playerId}`, JSON.stringify(selections));
+    if (!teamId) return;
+    const timer = window.setTimeout(() => {
+      const answers = Object.fromEntries(selections.map((choice, index) => [String(index), choice]).filter(([, choice]) => choice));
+      supabase.from("round2_drafts").upsert({ player_id: playerId, team_id: teamId, role: "captain", answers, updated_at: new Date().toISOString() }, { onConflict: "player_id" }).then();
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [playerId, teamId, draftReady, selections, submitted]);
 
   useEffect(() => {
     supabase
@@ -124,6 +149,8 @@ export default function Round2AnswerPage() {
       .from("round2_reps")
       .insert({ team_id: teamId, player_id: playerId });
     setSubmitted(true);
+    localStorage.removeItem(`bb_round2_captain_draft_${playerId}`);
+    await supabase.from("round2_drafts").delete().eq("player_id", playerId);
   }, [teamId, playerId, completedCount, selections]);
 
   const grid = useMemo(() => {

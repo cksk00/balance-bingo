@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAdminCookieValue } from "@/lib/adminAuth";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/admin/login") {
@@ -8,7 +9,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/admin")) {
-    const isAdmin = request.cookies.get("bb_admin")?.value === "1";
+    const secret = process.env.ADMIN_PASSWORD;
+    const expected = secret ? await getAdminCookieValue(secret) : "";
+    const isAdmin = Boolean(expected) && request.cookies.get("bb_admin")?.value === expected;
     if (!isAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin/login";

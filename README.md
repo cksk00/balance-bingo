@@ -51,6 +51,7 @@ Vercel 프로젝트 **Settings > Environment Variables**에 아래 세 개가 �
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `ADMIN_PASSWORD` (관리자 화면 로그인 비밀번호 — 새로 추가해야 함)
+- `SUPABASE_SERVICE_ROLE_KEY` (관리자 세션 강제 삭제 API 전용 — 서버 환경변수로만 설정)
 
 ## 추가 마이그레이션
 
@@ -74,6 +75,9 @@ ROUND 2 전용 `round2_cells` 테이블과 문항 25개를 추가합니다.
 
 이어서 `supabase/schema_v9.sql`을 실행합니다. 세션을 잃은 참가자가 이름을 다시
 입력하면 기존 답안과 참가자 기록을 유지한 채 현재 브라우저로 세션을 이전합니다.
+
+이어서 `supabase/schema_v10.sql`을 실행합니다. Round 2 최종 제출 전 답안을 로컬과
+DB에 자동 저장해 탭 종료나 다른 기기 재접속 후에도 복구할 수 있게 합니다.
 
 ROUND 2 순위는 팀원 다수결 빙고의 정확도 60점과 CAPTAIN 제출 이후 팀원 평균 제출시간의 상대점수 40점을 합산합니다.
 

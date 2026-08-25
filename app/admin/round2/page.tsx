@@ -76,6 +76,7 @@ export default function AdminRound2Page() {
     setBusy(true); setError("");
     const results = await Promise.all([
       supabase.from("round2_guesses").delete().not("player_id", "is", null),
+      supabase.from("round2_drafts").delete().not("player_id", "is", null),
       supabase.from("round2_reps").delete().not("team_id", "is", null),
       supabase.from("round2_answer_key").delete().not("team_id", "is", null),
       supabase.from("round2_team_results").update({ match_count: 0, match_percent: 0, revealed: false }).not("team_id", "is", null),

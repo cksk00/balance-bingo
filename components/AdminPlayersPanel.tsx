@@ -10,6 +10,7 @@ export function AdminPlayersPanel({ round }: { round?: 1 | 2 }) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [open, setOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [clearingSession, setClearingSession] = useState<string | null>(null);
   const [error, setError] = useState("");
   const enteredRound = (player: Player, targetRound: 1 | 2) =>
     targetRound === 1 ? player.current_round >= 1 : player.current_round === 2;
@@ -52,6 +53,16 @@ export function AdminPlayersPanel({ round }: { round?: 1 | 2 }) {
     setResetting(false);
   }
 
+  async function clearSession(player: Player) {
+    if (!confirm(`${player.nickname}님의 로그인 세션을 강제로 삭제할까요? 답안과 점수는 유지됩니다.`)) return;
+    setClearingSession(player.id);
+    setError("");
+    const response = await fetch(`/api/admin/players/${player.id}/session`, { method: "DELETE" });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) setError(result.error || "세션 삭제에 실패했습니다.");
+    setClearingSession(null);
+  }
+
   return (
     <section className="mb-6 rounded-2xl bg-white p-5 shadow">
       <div className="flex items-center justify-between gap-4">
@@ -59,7 +70,7 @@ export function AdminPlayersPanel({ round }: { round?: 1 | 2 }) {
         <div className="flex flex-wrap justify-end gap-2"><button onClick={() => setOpen((value) => !value)} className="rounded-xl bg-navy px-4 py-2 text-sm font-bold text-white">{open ? "상세 닫기" : "인원 상세 보기"}</button><button onClick={resetPlayers} disabled={!players.length || resetting} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">{resetting ? "초기화 중..." : "인원 초기화"}</button></div>
       </div>
       {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}
-      {open && <div className="mt-5 space-y-5">{(round ? [round] : [1, 2] as const).map((shownRound) => <div key={shownRound}><h3 className="mb-2 font-extrabold text-navy">ROUND {shownRound} 입장 · {players.filter((player) => enteredRound(player, shownRound)).length}명</h3><div className="grid gap-3 sm:grid-cols-2">{TEAMS.map((team) => { const members = players.filter((player) => player.team_id === team.id && enteredRound(player, shownRound)); return <div key={team.id} className="rounded-xl bg-blue-50 p-3"><p className="font-extrabold text-navy">{team.name} <span className="text-sm text-navy/50">{members.length}명</span></p><p className="mt-1 text-sm text-navy/70">{members.length ? members.map((member) => member.nickname).join(", ") : "없음"}</p></div>; })}</div></div>)}</div>}
+      {open && <div className="mt-5 space-y-5">{(round ? [round] : [1, 2] as const).map((shownRound) => <div key={shownRound}><h3 className="mb-2 font-extrabold text-navy">ROUND {shownRound} 입장 · {players.filter((player) => enteredRound(player, shownRound)).length}명</h3><div className="grid gap-3 sm:grid-cols-2">{TEAMS.map((team) => { const members = players.filter((player) => player.team_id === team.id && enteredRound(player, shownRound)); return <div key={team.id} className="rounded-xl bg-blue-50 p-3"><p className="font-extrabold text-navy">{team.name} <span className="text-sm text-navy/50">{members.length}명</span></p>{members.length ? <div className="mt-2 space-y-1.5">{members.map((member) => <div key={member.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/70 px-2 py-1.5"><span className="text-sm font-semibold text-navy/70">{member.nickname}</span><button onClick={() => clearSession(member)} disabled={clearingSession === member.id} className="rounded-md bg-red-100 px-2 py-1 text-[11px] font-bold text-red-700 disabled:opacity-40">{clearingSession === member.id ? "삭제 중" : "세션 삭제"}</button></div>)}</div> : <p className="mt-1 text-sm text-navy/70">없음</p>}</div>; })}</div></div>)}</div>}
     </section>
   );
 }

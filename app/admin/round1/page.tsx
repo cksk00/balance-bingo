@@ -63,7 +63,11 @@ export default function AdminRound1Page() {
   async function handleStart() {
     if (!confirm("모든 참가자의 ROUND 1을 지금 동시에 시작할까요?")) return;
     setError("");
-    const { error: updateError } = await supabase.from("game_state").update({ round1_started: true }).eq("id", 1);
+    const [stateResult, playersResult] = await Promise.all([
+      supabase.from("game_state").update({ round1_started: true, round1_revealed: false, round2_started: false, round2_revealed: false }).eq("id", 1),
+      supabase.from("players").update({ current_round: 1 }).not("id", "is", null),
+    ]);
+    const updateError = stateResult.error || playersResult.error;
     if (updateError) setError(updateError.message); else setStarted(true);
   }
 
@@ -110,6 +114,7 @@ export default function AdminRound1Page() {
       supabase.from("round1_results").delete().not("cell_index", "is", null),
       supabase.from("round1_answers").delete().not("player_id", "is", null),
       supabase.from("team_scores").update({ round1: 0 }).not("team_id", "is", null),
+      supabase.from("players").update({ current_round: 1 }).not("id", "is", null),
       supabase.from("game_state").update({ round1_started: false, round1_revealed: false }).eq("id", 1),
     ]);
     const failed = results.find((result) => result.error)?.error;

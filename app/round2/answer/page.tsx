@@ -61,10 +61,14 @@ export default function Round2AnswerPage() {
   useEffect(() => {
     supabase
       .from("game_state")
-      .select("round2_started, round2_revealed")
+      .select("round1_started, round1_revealed, round2_started, round2_revealed")
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
+        if (data?.round1_started && !data.round1_revealed && !data.round2_started) {
+          router.replace("/round1");
+          return;
+        }
         setRoundStarted(Boolean(data?.round2_started));
         if (data?.round2_revealed) router.push("/round2/results");
       });
@@ -75,7 +79,11 @@ export default function Round2AnswerPage() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_state", filter: "id=eq.1" },
         (payload) => {
-          const state = payload.new as { round2_started?: boolean; round2_revealed?: boolean };
+          const state = payload.new as { round1_started?: boolean; round1_revealed?: boolean; round2_started?: boolean; round2_revealed?: boolean };
+          if (state.round1_started && !state.round1_revealed && !state.round2_started) {
+            router.replace("/round1");
+            return;
+          }
           setRoundStarted(Boolean(state.round2_started));
           if (state.round2_revealed) router.push("/round2/results");
         }

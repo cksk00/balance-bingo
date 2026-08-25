@@ -38,6 +38,17 @@ export default function HomePage() {
     let cancelled = false;
 
     const restore = async () => {
+      const routeForPlayer = async (currentRound: number) => {
+        const { data: state } = await supabase
+          .from("game_state")
+          .select("round1_started, round1_revealed, round2_started, round2_revealed")
+          .eq("id", 1)
+          .maybeSingle();
+        if (state?.round2_started || state?.round2_revealed) return "/round2";
+        if (state?.round1_revealed && currentRound === 2) return "/round2";
+        return "/round1";
+      };
+
       for (let attempt = 0; attempt < 3; attempt++) {
         const { data, error: resumeError } = await supabase
           .rpc("resume_participant", { p_session_token: token })
@@ -48,7 +59,7 @@ export default function HomePage() {
           localStorage.setItem("bb_player_id", player.player_id);
           localStorage.setItem("bb_team_id", String(player.team_id));
           localStorage.setItem("bb_nickname", player.nickname);
-          router.replace(player.current_round === 2 ? "/round2" : "/round1");
+          router.replace(await routeForPlayer(player.current_round));
           return;
         }
         if (!resumeError) {
@@ -74,7 +85,7 @@ export default function HomePage() {
         if (cachedPlayer) {
           localStorage.setItem("bb_team_id", String(cachedPlayer.team_id));
           localStorage.setItem("bb_nickname", cachedPlayer.nickname);
-          router.replace(cachedPlayer.current_round === 2 ? "/round2" : "/round1");
+          router.replace(await routeForPlayer(cachedPlayer.current_round));
           return;
         }
       }

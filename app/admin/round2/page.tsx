@@ -80,6 +80,7 @@ export default function AdminRound2Page() {
       supabase.from("round2_answer_key").delete().not("team_id", "is", null),
       supabase.from("round2_team_results").update({ match_count: 0, match_percent: 0, revealed: false }).not("team_id", "is", null),
       supabase.from("team_scores").update({ round2: 0 }).not("team_id", "is", null),
+      supabase.from("players").update({ current_round: 1 }).not("id", "is", null),
       supabase.from("game_state").update({ round2_started: false, round2_revealed: false }).eq("id", 1),
     ]);
     const failed = results.find((result) => result.error)?.error;

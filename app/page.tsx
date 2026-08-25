@@ -35,21 +35,56 @@ export default function HomePage() {
       setRestoring(false);
       return;
     }
-    supabase.rpc("resume_participant", { p_session_token: token }).maybeSingle().then(({ data }) => {
-      if (data) {
-        const player = data as { player_id: string; nickname: string; team_id: number; current_round: number };
-        localStorage.setItem("bb_player_id", player.player_id);
-        localStorage.setItem("bb_team_id", String(player.team_id));
-        localStorage.setItem("bb_nickname", player.nickname);
-        router.replace(player.current_round === 2 ? "/round2" : "/round1");
-        return;
+    let cancelled = false;
+
+    const restore = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error: resumeError } = await supabase
+          .rpc("resume_participant", { p_session_token: token })
+          .maybeSingle();
+        if (cancelled) return;
+        if (data) {
+          const player = data as { player_id: string; nickname: string; team_id: number; current_round: number };
+          localStorage.setItem("bb_player_id", player.player_id);
+          localStorage.setItem("bb_team_id", String(player.team_id));
+          localStorage.setItem("bb_nickname", player.nickname);
+          router.replace(player.current_round === 2 ? "/round2" : "/round1");
+          return;
+        }
+        if (!resumeError) {
+          localStorage.removeItem("bb_session_token");
+          localStorage.removeItem("bb_player_id");
+          localStorage.removeItem("bb_team_id");
+          localStorage.removeItem("bb_nickname");
+          setRestoring(false);
+          return;
+        }
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
       }
-      localStorage.removeItem("bb_session_token");
-      localStorage.removeItem("bb_player_id");
-      localStorage.removeItem("bb_team_id");
-      localStorage.removeItem("bb_nickname");
+
+      // 일시적인 RPC 장애라면 세션 토큰을 삭제하지 않고 기존 참가자 정보로 복구한다.
+      const cachedPlayerId = localStorage.getItem("bb_player_id");
+      if (cachedPlayerId) {
+        const { data: cachedPlayer } = await supabase
+          .from("players")
+          .select("id, nickname, team_id, current_round")
+          .eq("id", cachedPlayerId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (cachedPlayer) {
+          localStorage.setItem("bb_team_id", String(cachedPlayer.team_id));
+          localStorage.setItem("bb_nickname", cachedPlayer.nickname);
+          router.replace(cachedPlayer.current_round === 2 ? "/round2" : "/round1");
+          return;
+        }
+      }
+      setError("세션 확인에 실패했어요. 네트워크를 확인한 뒤 새로고침해주세요.");
+      setStarted(true);
       setRestoring(false);
-    });
+    };
+
+    restore();
+    return () => { cancelled = true; };
   }, [router]);
 
   async function handleJoin() {

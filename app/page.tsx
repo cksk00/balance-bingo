@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { TEAMS } from "@/lib/teams";
 
 const previewQuestions = [
   ["다크모드", "라이트모드"], ["Claude", "Codex"], ["VS Code", "JetBrains"], ["Mac", "Windows"], ["Tab", "Space"],
@@ -24,27 +23,56 @@ export default function HomePage() {
   const router = useRouter();
   const [started, setStarted] = useState(false);
   const [nickname, setNickname] = useState("");
-  const [teamId, setTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [restoring, setRestoring] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("bb_session_token");
+    if (!token) {
+      setRestoring(false);
+      return;
+    }
+    supabase.rpc("resume_participant", { p_session_token: token }).maybeSingle().then(({ data }) => {
+      if (data) {
+        const player = data as { player_id: string; nickname: string; team_id: number; current_round: number };
+        localStorage.setItem("bb_player_id", player.player_id);
+        localStorage.setItem("bb_team_id", String(player.team_id));
+        localStorage.setItem("bb_nickname", player.nickname);
+        router.replace(player.current_round === 2 ? "/round2" : "/round1");
+        return;
+      }
+      localStorage.removeItem("bb_session_token");
+      localStorage.removeItem("bb_player_id");
+      localStorage.removeItem("bb_team_id");
+      localStorage.removeItem("bb_nickname");
+      setRestoring(false);
+    });
+  }, [router]);
 
   async function handleJoin() {
     setError("");
     if (!nickname.trim()) return setError("닉네임을 입력해주세요.");
-    if (!teamId) return setError("팀을 선택해주세요.");
     setLoading(true);
-    const { data, error: insertError } = await supabase
-      .from("players")
-      .insert({ nickname: nickname.trim(), team_id: teamId, current_round: 1 })
-      .select("id")
-      .single();
+    const sessionToken = localStorage.getItem("bb_session_token") || crypto.randomUUID();
+    const { data, error: claimError } = await supabase
+      .rpc("claim_participant", { p_name: nickname.trim(), p_session_token: sessionToken })
+      .maybeSingle();
     setLoading(false);
-    if (insertError || !data) return setError("입장에 실패했어요. 다시 시도해주세요.");
-    localStorage.setItem("bb_player_id", data.id);
-    localStorage.setItem("bb_team_id", String(teamId));
-    localStorage.setItem("bb_nickname", nickname.trim());
+    if (claimError || !data) {
+      if (claimError?.message.includes("ALREADY_CLAIMED")) return setError("이미 다른 브라우저에서 입장한 이름입니다. 운영진에게 문의해주세요.");
+      if (claimError?.message.includes("NAME_NOT_FOUND")) return setError("참가자 명단에서 이름을 찾을 수 없습니다. 실명을 정확히 입력해주세요.");
+      return setError("입장에 실패했어요. 다시 시도해주세요.");
+    }
+    const player = data as { player_id: string; nickname: string; team_id: number };
+    localStorage.setItem("bb_session_token", sessionToken);
+    localStorage.setItem("bb_player_id", player.player_id);
+    localStorage.setItem("bb_team_id", String(player.team_id));
+    localStorage.setItem("bb_nickname", player.nickname);
     router.push("/round1");
   }
+
+  if (restoring) return <main className="landing-page min-h-screen flex items-center justify-center"><div className="h-14 w-14 animate-spin rounded-full border-4 border-white/20 border-t-[#fff0c8]" /></main>;
 
   return (
     <main className="landing-page min-h-screen overflow-hidden px-5 py-6 md:px-10 md:py-8">
@@ -95,15 +123,12 @@ export default function HomePage() {
           <div className="w-full rounded-[2rem] border border-white/25 bg-[#073fae]/80 p-7 text-white shadow-2xl backdrop-blur md:p-10">
             <button onClick={() => setStarted(false)} className="mb-5 text-sm font-bold text-blue-200">← 돌아가기</button>
             <p className="text-sm font-bold tracking-[0.2em] text-blue-200">JOIN THE SESSION</p>
-            <h1 className="retro-title mb-8 mt-2 text-4xl">팀을 선택하세요</h1>
-            <label className="mb-2 block text-sm font-bold text-blue-100">닉네임</label>
-            <input value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="예: 홍길동" className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
-            <label className="mb-2 block text-sm font-bold text-blue-100">팀 선택</label>
-            <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {TEAMS.map((team) => <button key={team.id} onClick={() => setTeamId(team.id)} className={`rounded-xl py-3 font-extrabold transition ${teamId === team.id ? "bg-[#fff0c8] text-[#15377e] shadow-lg" : "bg-white/10 text-white hover:bg-white/20"}`}>{team.name}</button>)}
-            </div>
+            <h1 className="retro-title mb-3 mt-2 text-4xl">이름으로 입장하세요</h1>
+            <p className="mb-8 text-sm font-semibold text-blue-100">등록된 참가자 이름을 입력하면 배정된 팀으로 자동 입장합니다.</p>
+            <label className="mb-2 block text-sm font-bold text-blue-100">참가자 실명</label>
+            <input value={nickname} onChange={(event) => setNickname(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleJoin(); }} placeholder="예: 김나현" autoComplete="name" maxLength={20} className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
             {error && <p className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm font-bold text-red-100">{error}</p>}
-            <button onClick={handleJoin} disabled={loading} className="cream-button w-full py-4 text-lg font-extrabold disabled:opacity-50">{loading ? "입장 중..." : "빙고 시작하기 →"}</button>
+            <button onClick={handleJoin} disabled={loading} className="cream-button w-full py-4 text-lg font-extrabold disabled:opacity-50">{loading ? "계정 확인 중..." : "입장하기 →"}</button>
           </div>
         </section>
       )}

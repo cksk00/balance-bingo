@@ -87,7 +87,7 @@ export default function Round2AnswerPage() {
     if (submitted) return;
     setSelections((prev) => {
       const next = [...prev];
-      next[cellIndex] = next[cellIndex] === choice ? null : choice;
+      next[cellIndex] = choice;
       return next;
     });
   }

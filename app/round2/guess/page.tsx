@@ -101,7 +101,7 @@ export default function Round2GuessPage() {
     if (submitted) return;
     setSelections((prev) => {
       const next = [...prev];
-      next[cellIndex] = next[cellIndex] === choice ? null : choice;
+      next[cellIndex] = choice;
       return next;
     });
   }

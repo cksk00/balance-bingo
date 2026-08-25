@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Cell = { cell_index: number; option_a: string; option_b: string };
+type Cell = { cell_index: number; prompt: string; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
 
 type QuestionFlowProps = {
@@ -39,7 +39,7 @@ export function QuestionFlow({ cells, selections, disabled, submitting, submitLa
           <span className="font-extrabold">{step + 1} / 25</span>
         </div>
         <div className="mb-8 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-hit transition-all" style={{ width: `${((step + 1) / 25) * 100}%` }} /></div>
-        <p className="mb-5 text-center text-sm font-bold text-blue-200">더 마음에 드는 선택지를 골라주세요</p>
+        <p className="mb-5 text-center text-lg font-extrabold text-blue-100 sm:text-xl">{cell.prompt}</p>
         <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
           <button onClick={() => choose("A")} className={`min-h-32 rounded-2xl p-5 text-lg font-extrabold transition sm:min-h-52 ${selected === "A" ? "bg-accentA ring-4 ring-white" : "bg-white/10 hover:bg-accentA"}`}>{cell.option_a}</button>
           <span className="self-center text-center text-sm font-black text-hit">VS</span>

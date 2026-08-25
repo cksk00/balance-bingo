@@ -8,7 +8,7 @@ import { bingoLines } from "@/lib/bingoLines";
 import { QuestionFlow } from "@/components/QuestionFlow";
 import { WaitingScreen } from "@/components/WaitingScreen";
 
-type Cell = { cell_index: number; option_a: string; option_b: string };
+type Cell = { cell_index: number; prompt: string; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
 
 const ROWS = 5;

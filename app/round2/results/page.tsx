@@ -76,7 +76,7 @@ export default function Round2ResultsPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             <Round2Board title="CAPTAIN 빙고" cells={cells} answers={winner.captainAnswers} />
-            <Round2Board title="팀 제출 빙고" cells={cells} answers={winner.teamAnswers} compareTo={winner.captainAnswers} />
+            <Round2Board title="팀 제출 빙고" cells={cells} answers={winner.teamAnswers} compareTo={winner.captainAnswers} comparisonStyle="dim" />
           </div>
         </section>
       )}

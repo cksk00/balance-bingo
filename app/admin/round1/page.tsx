@@ -130,7 +130,7 @@ export default function AdminRound1Page() {
         <div className="flex items-center gap-3"><p className="text-sm text-navy/60">완주 {completedPlayers}명</p><button onClick={handleReset} disabled={resetting} className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-xl disabled:opacity-40">{resetting ? "초기화 중..." : "ROUND 1 초기화"}</button></div>
       </div>
 
-      <AdminPlayersPanel />
+      <AdminPlayersPanel round={1} />
 
       {!started && <button onClick={handleStart} className="mb-6 w-full rounded-xl bg-accentA py-4 text-lg font-extrabold text-white shadow-lg">ROUND 1 시작하기</button>}
       {started && !revealed && <p className="mb-6 rounded-xl bg-blue-100 p-4 text-sm font-bold text-navy">ROUND 1 진행 중 · 모든 참가자에게 문항이 열렸어요.</p>}

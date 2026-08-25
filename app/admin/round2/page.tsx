@@ -99,7 +99,7 @@ export default function AdminRound2Page() {
       <p className="text-sm text-navy/60 mb-6">종합점수 = 캡틴 빙고 점수 + 팀원 개인 점수 합계 + 아이스브레이킹 점수</p>
       {error && <p className="text-accentB text-sm mb-4">{error}</p>}
 
-      <AdminPlayersPanel />
+      <AdminPlayersPanel round={2} />
       {!started && <button onClick={startRound2} disabled={busy} className="mb-6 w-full rounded-xl bg-accentA py-4 text-lg font-extrabold text-white shadow-lg disabled:opacity-40">ROUND 2 시작하기</button>}
       {started && !rankingRevealed && <p className="mb-6 rounded-xl bg-blue-100 p-4 text-sm font-bold text-navy">ROUND 2 진행 중 · 모든 참가자에게 역할 선택 화면이 열렸어요.</p>}
 

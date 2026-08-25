@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { WaitingScreen } from "@/components/WaitingScreen";
 
 export default function Round2EntryPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function Round2EntryPage() {
   const [teamName, setTeamName] = useState("");
   const [captainId, setCaptainId] = useState<string | null>(null);
   const [rankingRevealed, setRankingRevealed] = useState(false);
+  const [roundStarted, setRoundStarted] = useState<boolean | null>(null);
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -41,11 +43,12 @@ export default function Round2EntryPage() {
       });
     supabase
       .from("game_state")
-      .select("round2_revealed")
+      .select("round2_started, round2_revealed")
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
         const isRevealed = Boolean(data?.round2_revealed);
+        setRoundStarted(Boolean(data?.round2_started));
         setRankingRevealed(isRevealed);
         if (isRevealed) router.push("/round2/results");
       });
@@ -58,7 +61,8 @@ export default function Round2EntryPage() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_state", filter: "id=eq.1" },
         (payload) => {
-          const state = payload.new as { round2_revealed?: boolean };
+          const state = payload.new as { round2_started?: boolean; round2_revealed?: boolean };
+          setRoundStarted(Boolean(state.round2_started));
           setRankingRevealed(Boolean(state.round2_revealed));
           if (state.round2_revealed) router.push("/round2/results");
         }
@@ -71,6 +75,9 @@ export default function Round2EntryPage() {
   }, [router]);
 
   const iAmCaptain = captainId === playerId;
+
+  if (roundStarted === null) return <WaitingScreen round={2} message="게임 상태를 확인하고 있어요." />;
+  if (!roundStarted) return <WaitingScreen round={2} />;
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">

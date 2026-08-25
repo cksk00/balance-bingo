@@ -10,6 +10,11 @@
   font-display: swap;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   background: #eaf1ff;
   color: #0b1130;
@@ -190,4 +195,5 @@ main:not(.landing-page)::before {
   .landing-clouds { transform: scale(0.78); transform-origin: bottom left; opacity: 0.5; }
   .landing-clouds-right { transform: scale(-0.78, 0.78); transform-origin: bottom right; }
   .landing-copy { position: relative; z-index: 5; transform: translateY(-14px); }
+  .landing-header-logo { transform: translateY(-12px) rotate(-3deg); }
 }

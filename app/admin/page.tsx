@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AdminPlayersPanel } from "@/components/AdminPlayersPanel";
 
 export default function AdminHome() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function AdminHome() {
         </button>
       </div>
 
+      <AdminPlayersPanel />
       <div className="space-y-4">
         {links.map((l) => (
           <Link

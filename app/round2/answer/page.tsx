@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUND2_CELLS } from "@/lib/questions";
+import { QuestionFlow } from "@/components/QuestionFlow";
+import { WaitingScreen } from "@/components/WaitingScreen";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -20,6 +22,7 @@ export default function Round2AnswerPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [roundStarted, setRoundStarted] = useState<boolean | null>(null);
 
   useEffect(() => {
     const pid = localStorage.getItem("bb_player_id");
@@ -56,10 +59,11 @@ export default function Round2AnswerPage() {
   useEffect(() => {
     supabase
       .from("game_state")
-      .select("round2_revealed")
+      .select("round2_started, round2_revealed")
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
+        setRoundStarted(Boolean(data?.round2_started));
         if (data?.round2_revealed) router.push("/round2/results");
       });
 
@@ -69,7 +73,8 @@ export default function Round2AnswerPage() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_state", filter: "id=eq.1" },
         (payload) => {
-          const state = payload.new as { round2_revealed?: boolean };
+          const state = payload.new as { round2_started?: boolean; round2_revealed?: boolean };
+          setRoundStarted(Boolean(state.round2_started));
           if (state.round2_revealed) router.push("/round2/results");
         }
       )
@@ -117,6 +122,9 @@ export default function Round2AnswerPage() {
     return g;
   }, [cells]);
 
+  if (roundStarted === null) return <WaitingScreen round={2} message="게임 상태를 확인하고 있어요." />;
+  if (!roundStarted) return <WaitingScreen round={2} />;
+
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
@@ -130,51 +138,8 @@ export default function Round2AnswerPage() {
         </p>
       </div>
 
-      <div className="bg-navy rounded-3xl p-6 shadow-xl">
-        {error && <p className="text-accentB text-sm mb-4">{error}</p>}
-        <div className="grid grid-cols-5 gap-2">
-          {grid.map((row) =>
-            row.map((cell) => {
-              const choice = selections[cell.cell_index];
-              return (
-                <div
-                  key={cell.cell_index}
-                  className="bg-white/5 rounded-xl p-1.5 flex flex-col gap-1"
-                >
-                  <button
-                    onClick={() => toggle(cell.cell_index, "A")}
-                    className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
-                      choice === "A"
-                        ? "bg-accentA text-white"
-                        : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    }`}
-                  >
-                    {cell.option_a}
-                  </button>
-                  <button
-                    onClick={() => toggle(cell.cell_index, "B")}
-                    className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
-                      choice === "B"
-                        ? "bg-accentB text-white"
-                        : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    }`}
-                  >
-                    {cell.option_b}
-                  </button>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        <button
-          onClick={handleSubmit}
-          disabled={completedCount < 25 || submitting || submitted}
-          className="w-full mt-6 bg-accentA hover:bg-blue-500 transition text-white font-bold py-3 rounded-xl disabled:opacity-40"
-        >
-          {submitted ? "CAPTAIN 제출 완료 · 수정 불가" : submitting ? "제출 중..." : "CAPTAIN으로 제출하기"}
-        </button>
-      </div>
+      {error && <p className="text-accentB text-sm mb-4">{error}</p>}
+      <QuestionFlow cells={cells} selections={selections} disabled={submitted} submitting={submitting} submitLabel="CAPTAIN으로 제출하기" onChange={toggle} onSubmit={handleSubmit} />
     </main>
   );
 }

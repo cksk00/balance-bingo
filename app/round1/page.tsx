@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUND1_CELLS } from "@/lib/questions";
 import { bingoLines } from "@/lib/bingoLines";
+import { QuestionFlow } from "@/components/QuestionFlow";
+import { WaitingScreen } from "@/components/WaitingScreen";
 
 type Cell = { cell_index: number; option_a: string; option_b: string };
 type Choice = "A" | "B" | null;
@@ -24,15 +26,18 @@ export default function Round1Page() {
   const [revealed, setRevealed] = useState(false);
   const [validChoices, setValidChoices] = useState<Record<number, ValidChoice>>({});
   const [bingoCount, setBingoCount] = useState(0);
+  const [roundStarted, setRoundStarted] = useState<boolean | null>(null);
+  const [teamScore, setTeamScore] = useState(0);
 
   // 결과 공개 상태 구독
   useEffect(() => {
     supabase
       .from("game_state")
-      .select("round1_revealed")
+      .select("round1_started, round1_revealed")
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
+        setRoundStarted(Boolean(data?.round1_started));
         if (data?.round1_revealed) setRevealed(true);
       });
 
@@ -42,7 +47,8 @@ export default function Round1Page() {
         "postgres_changes",
         { event: "*", schema: "public", table: "game_state" },
         (payload) => {
-          const row = payload.new as { round1_revealed?: boolean };
+          const row = payload.new as { round1_started?: boolean; round1_revealed?: boolean };
+          setRoundStarted(Boolean(row?.round1_started));
           if (row?.round1_revealed) setRevealed(true);
         }
       )
@@ -74,6 +80,8 @@ export default function Round1Page() {
       .then(({ data }) => {
         setBingoCount(data?.bingo_count || 0);
       });
+    const teamId = Number(localStorage.getItem("bb_team_id"));
+    if (teamId) supabase.from("team_scores").select("round1").eq("team_id", teamId).maybeSingle().then(({ data }) => setTeamScore(data?.round1 || 0));
   }, [revealed, playerId]);
 
   // 로그인 확인
@@ -161,6 +169,9 @@ export default function Round1Page() {
     return { validMineFlags: validMine, bingoCellFlags: bingoCells };
   }, [revealed, selections, validChoices]);
 
+  if (roundStarted === null) return <WaitingScreen round={1} message="게임 상태를 확인하고 있어요." />;
+  if (!roundStarted) return <WaitingScreen round={1} />;
+
   return (
     <main className="min-h-screen px-4 py-8 max-w-2xl mx-auto">
       <div className="mb-6">
@@ -180,6 +191,7 @@ export default function Round1Page() {
             {bingoCount > 0
               ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
               : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
+            <div className="mt-3 grid grid-cols-2 gap-2 text-center"><p className="rounded-lg bg-blue-50 p-3">내 점수<br /><strong className="text-xl">{bingoCount * 10}점</strong></p><p className="rounded-lg bg-blue-50 p-3">우리 팀 점수<br /><strong className="text-xl">{teamScore}점</strong></p></div>
           </div>
           <button
             onClick={() => router.push("/round2")}
@@ -190,58 +202,7 @@ export default function Round1Page() {
         </div>
       )}
 
-      <div className="bg-navy rounded-3xl p-6 shadow-xl">
-        <div className="relative grid grid-cols-5 gap-2">
-          {grid.map((row) =>
-            row.map((cell) => {
-              const choice = selections[cell.cell_index];
-              const valid = validChoices[cell.cell_index];
-              const isDimmed = revealed && valid !== undefined && !validMineFlags[cell.cell_index];
-              const isBingoCell = bingoCellFlags[cell.cell_index];
-              return (
-                <div
-                  key={cell.cell_index}
-                  className={`relative overflow-hidden bg-white/5 rounded-xl p-1.5 flex flex-col gap-1 transition ${
-                    isDimmed ? "opacity-[0.12] brightness-50 grayscale" : ""
-                  }`}
-                >
-                  {isBingoCell && (
-                    <div className="pointer-events-none absolute inset-0 z-20 bg-[#FFF3A3]/30" />
-                  )}
-                  <button
-                    onClick={() => toggle(cell.cell_index, "A")}
-                    className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
-                      choice === "A"
-                        ? "bg-accentA text-white"
-                        : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    }`}
-                  >
-                    {cell.option_a}
-                  </button>
-                  <button
-                    onClick={() => toggle(cell.cell_index, "B")}
-                    className={`text-[11px] leading-tight rounded-lg py-2 px-1 font-semibold transition ${
-                      choice === "B"
-                        ? "bg-accentB text-white"
-                        : "bg-white/10 text-blue-100 hover:bg-white/20"
-                    }`}
-                  >
-                    {cell.option_b}
-                  </button>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        <button
-          onClick={handleSubmit}
-          disabled={completedCount < 25 || submitting || submitted}
-          className="w-full mt-6 bg-accentA hover:bg-blue-500 transition text-white font-bold py-3 rounded-xl disabled:opacity-40"
-        >
-          {submitted ? "제출 완료 · 결과 공개를 기다려주세요" : submitting ? "제출 중..." : "제출하기"}
-        </button>
-      </div>
+      <QuestionFlow cells={cells} selections={selections} disabled={submitted} submitting={submitting} onChange={toggle} onSubmit={handleSubmit} />
     </main>
   );
 }

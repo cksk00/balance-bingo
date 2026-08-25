@@ -60,6 +60,9 @@ Vercel 프로젝트 **Settings > Environment Variables**에 아래 세 개가 �
 이어서 `supabase/schema_v4.sql`을 실행합니다. ROUND 1 문항 25개를 교체하고
 ROUND 2 전용 `round2_cells` 테이블과 문항 25개를 추가합니다.
 
+마지막으로 `supabase/schema_v5.sql`을 실행합니다. 관리자가 ROUND 1·2를 시작할 때
+대기 중인 참가자 화면이 실시간으로 동시에 열리도록 시작 상태를 추가합니다.
+
 ROUND 2 순위는 팀원 다수결 빙고의 정확도 60점과 CAPTAIN 제출 이후 팀원 평균 제출시간의 상대점수 40점을 합산합니다.
 
 환경변수를 추가/수정한 뒤에는 **Deployments 탭 > 최신 배포 > Redeploy**를 한 번 눌러줘야 반영돼요.

@@ -11,11 +11,12 @@ type QuestionFlowProps = {
   disabled?: boolean;
   submitting?: boolean;
   submitLabel?: string;
+  resultFlags?: boolean[];
   onChange: (index: number, choice: "A" | "B") => void;
   onSubmit: () => void;
 };
 
-export function QuestionFlow({ cells, selections, disabled, submitting, submitLabel = "최종 제출하기", onChange, onSubmit }: QuestionFlowProps) {
+export function QuestionFlow({ cells, selections, disabled, submitting, submitLabel = "최종 제출하기", resultFlags, onChange, onSubmit }: QuestionFlowProps) {
   const firstEmpty = selections.findIndex((choice) => choice === null);
   const [step, setStep] = useState(firstEmpty === -1 ? 25 : firstEmpty);
 
@@ -58,7 +59,8 @@ export function QuestionFlow({ cells, selections, disabled, submitting, submitLa
       <div className="grid grid-cols-5 gap-1.5">
         {cells.map((cell) => {
           const choice = selections[cell.cell_index];
-          return <button key={cell.cell_index} disabled={disabled} onClick={() => setStep(cell.cell_index)} className={`flex aspect-square items-center justify-center rounded-lg p-1 text-center text-[9px] font-bold leading-tight sm:text-xs ${choice === "A" ? "bg-accentA" : choice === "B" ? "bg-accentB" : "bg-white/10"}`}>{choice === "A" ? cell.option_a : choice === "B" ? cell.option_b : "미선택"}</button>;
+          const isIncorrect = resultFlags !== undefined && !resultFlags[cell.cell_index];
+          return <button key={cell.cell_index} disabled={disabled} onClick={() => setStep(cell.cell_index)} className={`flex aspect-square items-center justify-center rounded-lg p-1 text-center text-[9px] font-bold leading-tight transition sm:text-xs ${choice === "A" ? "bg-accentA" : choice === "B" ? "bg-accentB" : "bg-white/10"} ${isIncorrect ? "opacity-20 brightness-50 grayscale" : ""}`}>{choice === "A" ? cell.option_a : choice === "B" ? cell.option_b : "미선택"}</button>;
         })}
       </div>
       <button onClick={onSubmit} disabled={disabled || submitting || selections.some((choice) => choice === null)} className="mt-6 w-full rounded-xl bg-hit py-4 font-extrabold text-ink disabled:opacity-40">{disabled ? "제출 완료" : submitting ? "제출 중..." : submitLabel}</button>

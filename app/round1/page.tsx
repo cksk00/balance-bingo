@@ -213,7 +213,7 @@ export default function Round1Page() {
         </div>
       )}
 
-      <QuestionFlow cells={cells} selections={selections} disabled={submitted} submitting={submitting} onChange={toggle} onSubmit={handleSubmit} />
+      <QuestionFlow cells={cells} selections={selections} disabled={submitted} submitting={submitting} resultFlags={revealed ? validMineFlags : undefined} onChange={toggle} onSubmit={handleSubmit} />
     </main>
   );
 }

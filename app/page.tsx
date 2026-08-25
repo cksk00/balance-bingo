@@ -126,7 +126,7 @@ export default function HomePage() {
             <h1 className="retro-title mb-3 mt-2 text-4xl">이름으로 입장하세요</h1>
             <p className="mb-8 text-sm font-semibold text-blue-100">등록된 참가자 이름을 입력하면 배정된 팀으로 자동 입장합니다.</p>
             <label className="mb-2 block text-sm font-bold text-blue-100">참가자 실명</label>
-            <input value={nickname} onChange={(event) => setNickname(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleJoin(); }} placeholder="예: 김나현" autoComplete="name" maxLength={20} className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
+            <input value={nickname} onChange={(event) => setNickname(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleJoin(); }} placeholder="예: 홍길동" autoComplete="name" maxLength={20} className="mb-6 w-full rounded-xl border-2 border-white/20 bg-white px-4 py-3 font-semibold text-ink outline-none focus:border-[#ffe8a8]" />
             {error && <p className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm font-bold text-red-100">{error}</p>}
             <button onClick={handleJoin} disabled={loading} className="cream-button w-full py-4 text-lg font-extrabold disabled:opacity-50">{loading ? "계정 확인 중..." : "입장하기 →"}</button>
           </div>

@@ -49,7 +49,7 @@ create table if not exists round2_answer_key (
 -- ROUND 2: 팀원들이 예측해서 제출한 빙고판
 create table if not exists round2_guesses (
   player_id uuid primary key references players(id) on delete cascade,
-  team_id int references teams(id),
+  team_id int unique references teams(id),
   answers jsonb not null,
   created_at timestamptz default now()
 );
@@ -58,7 +58,7 @@ create table if not exists round2_guesses (
 create table if not exists team_scores (
   team_id int primary key references teams(id),
   icebreaking int default 0,
-  round1 int default 0,
+  round1 numeric(8,2) default 0,
   round2 int default 0
 );
 

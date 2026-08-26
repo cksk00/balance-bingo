@@ -214,7 +214,7 @@ export default function Round1Page() {
             {bingoCount > 0
               ? `결과가 공개됐어요! 빙고 ${bingoCount}줄을 완성했어요 🎉 팀 점수에 반영됐어요.`
               : "결과가 공개됐어요. 아쉽게도 이번엔 빙고를 완성하지 못했어요."}
-            <div className="mt-3 grid grid-cols-2 gap-2 text-center"><p className="rounded-lg bg-blue-50 p-3">내 점수<br /><strong className="text-xl">{validMineFlags.filter(Boolean).length + bingoCount * 10}점</strong><br /><span className="text-xs text-navy/60">정답 {validMineFlags.filter(Boolean).length}개 + 빙고 {bingoCount}줄</span></p><p className="rounded-lg bg-blue-50 p-3">우리 팀 점수<br /><strong className="text-xl">{teamScore}점</strong><br /><span className="text-xs text-navy/60">팀원 개인 점수 합계</span></p></div>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-center"><p className="rounded-lg bg-blue-50 p-3">내 점수<br /><strong className="text-xl">{validMineFlags.filter(Boolean).length + bingoCount * 10}점</strong><br /><span className="text-xs text-navy/60">정답 {validMineFlags.filter(Boolean).length}개 + 빙고 {bingoCount}줄</span></p><p className="rounded-lg bg-blue-50 p-3">우리 팀 점수<br /><strong className="text-xl">{teamScore}점</strong><br /><span className="text-xs text-navy/60">완주 팀원 개인 점수 평균</span></p></div>
           </div>
           <button
             onClick={moveToRound2}

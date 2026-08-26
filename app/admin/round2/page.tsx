@@ -98,7 +98,7 @@ export default function AdminRound2Page() {
         <h1 className="text-3xl font-extrabold text-navy">ROUND 2 관리</h1>
         <button onClick={resetRound2} disabled={busy} className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-xl disabled:opacity-40">ROUND 2 초기화</button>
       </div>
-      <p className="text-sm text-navy/60 mb-6">종합점수 = 캡틴 빙고 점수 + 팀원 개인 점수 합계 + 아이스브레이킹 점수</p>
+      <p className="text-sm text-navy/60 mb-6">종합점수 = 캡틴 빙고 점수 + 팀 일반 제출 점수 + 아이스브레이킹 점수</p>
       {error && <p className="text-accentB text-sm mb-4">{error}</p>}
 
       <AdminPlayersPanel round={2} />
@@ -108,7 +108,7 @@ export default function AdminRound2Page() {
       <section className="bg-navy text-white rounded-3xl p-6 shadow-xl mb-8">
         <div className="flex items-center justify-between gap-3 mb-4"><h2 className="text-xl font-extrabold">실시간 팀 순위</h2><button onClick={revealRankings} disabled={busy || !started || rankingRevealed || rankings.length === 0} className="bg-hit text-ink font-bold px-4 py-2 rounded-xl disabled:opacity-40">{rankingRevealed ? "순위 공개 완료" : "순위 공개하기"}</button></div>
         <div className="space-y-2">
-          {rankings.map((row) => <div key={row.teamId} className="bg-white/10 rounded-xl px-4 py-3 grid grid-cols-[55px_1fr_auto] gap-3 items-center"><p className="text-xl font-extrabold">{row.rank}위</p><div><p className="font-bold">{teamName(row.teamId)}</p><p className="text-xs text-blue-200">캡틴 빙고 {row.captainBingoScore}점 · 개인 합계 {row.individualScore}점 · 아이스브레이킹 {row.icebreakingScore}점</p></div><p className="text-right font-bold">총 {row.totalScore}점<br /><span className="text-xs text-blue-200">{row.matchCount}/25 · 빙고 {row.bingoCount}줄</span></p></div>)}
+          {rankings.map((row) => <div key={row.teamId} className="bg-white/10 rounded-xl px-4 py-3 grid grid-cols-[55px_1fr_auto] gap-3 items-center"><p className="text-xl font-extrabold">{row.rank}위</p><div><p className="font-bold">{teamName(row.teamId)}</p><p className="text-xs text-blue-200">캡틴 빙고 {row.captainBingoScore}점 · 일반 제출 {row.individualScore}점 · 아이스브레이킹 {row.icebreakingScore}점</p></div><p className="text-right font-bold">총 {row.totalScore}점<br /><span className="text-xs text-blue-200">{row.matchCount}/25 · 빙고 {row.bingoCount}줄</span></p></div>)}
           {rankings.length === 0 && <p className="text-sm text-blue-200">CAPTAIN과 일반 제출이 모두 있는 팀부터 순위에 표시됩니다.</p>}
         </div>
       </section>
@@ -119,9 +119,9 @@ export default function AdminRound2Page() {
           const teamGuesses = guesses.filter((guess) => guess.team_id === team.id);
           const result = rankings.find((row) => row.teamId === team.id);
           return <details key={team.id} className="bg-white rounded-2xl p-5 shadow" open={Boolean(result)}>
-            <summary className="cursor-pointer list-none flex items-center justify-between gap-3"><div><p className="font-extrabold text-lg text-navy">{team.name}</p><p className="text-xs text-navy/60">CAPTAIN {captain ? "제출완료" : "미제출"} · 일반 제출 {teamGuesses.length}명</p></div>{result && <p className="font-bold text-accentA">{result.rank}위 · {result.matchCount}/25 ({result.matchPercent}%)</p>}</summary>
-            {captain && <div className={`grid ${result ? "md:grid-cols-2" : "md:grid-cols-1 max-w-md"} gap-5 mt-5`}><Round2Board title="CAPTAIN 빙고" cells={cells} answers={captain.answers} />{result && <Round2Board title="팀 제출 빙고 (팀원 다수결)" cells={cells} answers={result.teamAnswers} compareTo={captain.answers} comparisonStyle="dim" />}</div>}
-            {captain && teamGuesses.length > 0 && <div className="mt-5"><p className="text-sm font-bold text-navy mb-2">개인 제출 빙고</p><div className="space-y-2">{teamGuesses.map((guess) => { const score = result?.individualScores.find((item) => item.playerId === guess.player_id); const matches = score?.matchCount || 0; return <details key={guess.player_id} className="border border-gray-200 rounded-xl p-3"><summary className="cursor-pointer text-sm font-semibold text-navy">{guess.players?.nickname} · {score?.score || 0}점 (정답 {matches}개 + 빙고 {score?.bingoCount || 0}줄) · {new Date(guess.created_at).toLocaleTimeString("ko-KR")}</summary><div className="mt-3"><Round2Board title={`${guess.players?.nickname} 제출 빙고`} cells={cells} answers={guess.answers} compareTo={captain.answers} comparisonStyle="dim" /></div></details>; })}</div></div>}
+            <summary className="cursor-pointer list-none flex items-center justify-between gap-3"><div><p className="font-extrabold text-lg text-navy">{team.name}</p><p className="text-xs text-navy/60">CAPTAIN {captain ? "제출완료" : "미제출"} · 일반 제출 {teamGuesses.length > 0 ? "완료" : "미제출"}</p></div>{result && <p className="font-bold text-accentA">{result.rank}위 · {result.matchCount}/25 ({result.matchPercent}%)</p>}</summary>
+            {captain && <div className={`grid ${result ? "md:grid-cols-2" : "md:grid-cols-1 max-w-md"} gap-5 mt-5`}><Round2Board title="CAPTAIN 빙고" cells={cells} answers={captain.answers} />{result && <Round2Board title="팀 일반 제출 빙고" cells={cells} answers={result.teamAnswers} compareTo={captain.answers} comparisonStyle="dim" />}</div>}
+            {captain && teamGuesses.length > 0 && <div className="mt-5"><p className="text-sm font-bold text-navy mb-2">팀 일반 제출 빙고</p><div className="space-y-2">{teamGuesses.map((guess) => { const score = result?.individualScores.find((item) => item.playerId === guess.player_id); const matches = score?.matchCount || 0; return <details key={guess.player_id} className="border border-gray-200 rounded-xl p-3"><summary className="cursor-pointer text-sm font-semibold text-navy">제출자 {guess.players?.nickname} · {score?.score || 0}점 (정답 {matches}개 + 빙고 {score?.bingoCount || 0}줄) · {new Date(guess.created_at).toLocaleTimeString("ko-KR")}</summary><div className="mt-3"><Round2Board title={`${guess.players?.nickname} 제출 빙고`} cells={cells} answers={guess.answers} compareTo={captain.answers} comparisonStyle="dim" /></div></details>; })}</div></div>}
           </details>;
         })}
       </section>

@@ -96,8 +96,8 @@ export default function Round2EntryPage() {
         <h1 className="text-2xl font-extrabold mb-6">{teamName}</h1>
 
         <p className="text-sm text-blue-100 mb-6">
-          대표자는 왼쪽에서 CAPTAIN 빙고를 먼저 제출하고, 나머지 팀원은
-          오른쪽에서 대표자의 답을 예측해 제출하세요.
+          대표자는 왼쪽에서 CAPTAIN 빙고를 먼저 제출하고, 팀원 중 한 명은
+          오른쪽에서 대표자의 답을 예측해 팀당 한 번 제출하세요.
         </p>
 
         <div className="grid grid-cols-2 gap-3">

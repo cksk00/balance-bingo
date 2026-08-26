@@ -40,11 +40,11 @@ export default function Round2GuessPage() {
   }, [router]);
 
   useEffect(() => {
-    if (!playerId) return;
+    if (!playerId || !teamId) return;
     supabase
       .from("round2_guesses")
-      .select("answers")
-      .eq("player_id", playerId)
+      .select("answers, player_id")
+      .eq("team_id", teamId)
       .maybeSingle()
       .then(async ({ data }) => {
         const draftKey = `bb_round2_guess_draft_${playerId}`;
@@ -67,7 +67,7 @@ export default function Round2GuessPage() {
         }
         setDraftReady(true);
       });
-  }, [playerId]);
+  }, [playerId, teamId]);
 
   useEffect(() => {
     if (!playerId || !draftReady || submitted) return;
@@ -156,7 +156,7 @@ export default function Round2GuessPage() {
       .insert({ player_id: playerId, team_id: teamId, answers });
     setSubmitting(false);
     if (error) {
-      setError("이미 제출한 빙고는 수정할 수 없어요.");
+      setError("이미 이 팀의 일반 빙고가 제출됐어요. 팀당 한 번만 제출할 수 있습니다.");
       return;
     }
     setSubmitted(true);
@@ -182,7 +182,7 @@ export default function Round2GuessPage() {
           우리 팀 대표자가 골랐을 법한 답을 예측하세요
         </h1>
         <p className="text-sm text-navy/60 mt-2">
-          완료 {completedCount} / 25 · 결과는 라운드가 끝난 뒤 공개돼요.
+          완료 {completedCount} / 25 · 팀당 한 번만 제출할 수 있고 결과는 라운드가 끝난 뒤 공개돼요.
         </p>
       </div>
 

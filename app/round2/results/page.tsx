@@ -71,7 +71,7 @@ export default function Round2ResultsPage() {
             <p className="text-5xl mb-2">🏆</p>
             <p className="text-4xl font-extrabold text-navy">1위 · {teamName(winner.teamId)}</p>
             <p className="text-navy/60 mt-2">
-              캡틴 빙고 {winner.captainBingoScore}점 · 개인 합계 {winner.individualScore}점 · 아이스브레이킹 {winner.icebreakingScore}점 · 종합 {winner.totalScore}점
+              캡틴 빙고 {winner.captainBingoScore}점 · 일반 제출 {winner.individualScore}점 · 아이스브레이킹 {winner.icebreakingScore}점 · 종합 {winner.totalScore}점
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
@@ -89,7 +89,7 @@ export default function Round2ResultsPage() {
         <section className="space-y-3">
           {rankings.map((row) => (
             <div key={row.teamId} className="bg-white rounded-2xl p-5 shadow flex items-center justify-between">
-              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">캡틴 빙고 {row.captainBingoScore}점 · 개인 합계 {row.individualScore}점 · 아이스브레이킹 {row.icebreakingScore}점</p></div>
+              <div><p className="text-xl font-extrabold text-navy">{row.rank}위 · {teamName(row.teamId)}</p><p className="text-sm text-navy/60">캡틴 빙고 {row.captainBingoScore}점 · 일반 제출 {row.individualScore}점 · 아이스브레이킹 {row.icebreakingScore}점</p></div>
               <p className="text-right font-bold text-navy">총 {row.totalScore}점<br /><span className="text-sm">{row.matchCount}/25 · 빙고 {row.bingoCount}줄</span></p>
             </div>
           ))}
